@@ -1,0 +1,17 @@
+{
+  "id": "/",
+  "name": "Trenio",
+  "short_name": "Trenio",
+  "description": "Tvoj osobni prostor za zadatke i bilješke.",
+  "lang": "hr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#03313A",
+  "theme_color": "#03313A",
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "/icons/trenio-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/trenio-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
