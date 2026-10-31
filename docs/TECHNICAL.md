@@ -103,7 +103,7 @@ Izvoz sada koristi format 4 (ideje su uvele format 3) i polje `kind`; parser pri
 
 Provjereni postupak nakon builda: `npx --yes wrangler@4.154.0 pages deploy dist --project-name trenio --branch main`, uz identitet postojećeg računa. Build i sve produkcijske datoteke provjeriti prije zatvaranja objave. Stvarni plan i izvoz formata 2 provjereni su na produkciji; oporavak stvarnog izvoza prošao je u privremenim tablicama uz ROLLBACK.
 
-Frontend je objavljen na Cloudflare Pages Free planu, uz postojeći Supabase za podatke i prijavu, prema korisnikovu nalogu „Kreni dalje”. Produkcija: https://trenio.pages.dev/, Direct Upload projekt `trenio`, početni deployment `598bc3fa-cc68-4684-a39f-29f557ac197c` od 27. 10. 2026. Od 31. 10. projekt ima lokalni Git repozitorij; privatni GitHub repozitorij je `dcirko-side-projects/trenio`. Objava ostaje ručni Wrangler Direct Upload, bez nove CI/CD integracije. Nisu dodani novi paketi ni vlastiti server.
+Frontend je objavljen na Cloudflare Pages Free planu, uz postojeći Supabase za podatke i prijavu, prema korisnikovu nalogu „Kreni dalje”. Produkcija: https://trenio.pages.dev/, Direct Upload projekt `trenio`, početni deployment `598bc3fa-cc68-4684-a39f-29f557ac197c` od 27. 10. 2026. Od 31. 10. projekt ima lokalni Git repozitorij; javni GitHub repozitorij je `dcirko-side-projects/trenio`. Objava ostaje ručni Wrangler Direct Upload, bez nove CI/CD integracije. Nisu dodani novi paketi ni vlastiti server.
 
 Uspoređeni su službeni planovi:
 
