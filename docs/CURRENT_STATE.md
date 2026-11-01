@@ -2,7 +2,7 @@
 
 Ažurirano: 1. 11. 2026.
 
-## Neutralna paleta i otvaranje bez tipkovnice — 1. 11. 2026. (lokalno, čeka objavu)
+## Neutralna paleta i otvaranje bez tipkovnice — 1. 11. 2026. (objavljeno)
 
 - Primijenjena je korisnikova nova paleta: #2A2A2A za tekst, znak i glavne gumbe, #C0C0C0 za diskretne obrube, #E10600 za male naglaske i aktivna stanja. Većina sučelja koristi neutralne #F5F5F5/#FFFFFF površine. Usklađeni su navigacija, obrasci, dijalozi, toolbar, greške, manifest, theme-color i SVG/PNG PWA ikone.
 - Otvaranje i ponovno otvaranje zadatka, bilješke, plana, ideje i kategorije te prelazak na povezani zapis fokusira statički naslov dijaloga. Pretraga fokusira naslov ekrana. Nema početnog fokusa tekstualnih polja ni Tiptap editora, uključujući kratkotrajni fokus prije postavljanja na naslov. Dodir polja i tipkovnička navigacija rade; sačuvani su modalnost, Escape i povratak pokretaču.
@@ -10,7 +10,7 @@ Ažurirano: 1. 11. 2026.
 - Prolaze lint, TypeScript/build, 25 domenskih testova, svih 63 UI provjere na 320/390/1366 px i 16 izoliranih API/UI provjera. Nakon završne dorade Enter/Escape dodatno prolaze ciljane provjere sporog/neuspješnog spremanja i povezivanja. Početni sandbox pokušaji nisu mogli pokrenuti preglednik/lokalnu komunikaciju; ponovljene provjere s potrebnim pristupom prolaze. Nova provjera fokusa prvo je imala neprecizan testni selektor (tri gumba zadatka); selektor je ispravljen i završni komplet prolazi.
 - Izračunati kontrasti: glavni tekst 13,17:1 na pozadini, bijeli tekst glavnog gumba 14,35:1, sekundarni tekst na blago naglašenoj površini 5,21:1, crvena na pozadini 4,56:1, rub polja najmanje 3,15:1 i tekst greške 7,49:1. Kategorijske ikone na bijeloj najmanje 5,67:1. Snimke ključnih prikaza na 320/390/800/1366 px nemaju horizontalno prelijevanje; mobilni/desktop Pregled, kategorijski obrazac, editor i PWA ikona vizualno su pregledani.
 - Fizička Samsung tipkovnica nije dostupna u ovom okruženju. Testovi dokazuju odsustvo aplikacijskog autofokusa; ne zamjenjuju provjeru stvarnog IME-a i OS-a na uređaju. Baza i korisnički sadržaj nisu mijenjani.
-- Objava je pokušavana tek nakon provjera, ali automatska provjera odobrenja odbila je Wrangler slanje frontenda na postojeći Cloudflare Pages projekt jer ne smatra raniju evidenciju pouzdanom autorizacijom za konkretni payload i odredište. Objavljivanje nije izvedeno; produkcija ostaje na prethodnoj verziji. Korisnik je zatim izričito odobrio commit, push i objavu ovog builda na https://trenio.pages.dev/; objava slijedi nakon commita i pusha. Pripremljeni build: glavni JS index-Dkj5lM1t.js, editor NoteEditor-De1NsSEG.js, CSS index-Bqmg0GBs.css. Nakon objave pokrenuti check:release.
+- Nakon početnog odbijanja automatske provjere korisnik je izričito odobrio commit, push i objavu. Implementacija je commitana kao `75ffd65` i pushana na `origin/main`. Wrangler 4.154.0 objavio je frontend na https://trenio.pages.dev/, deployment https://0ccd020d.trenio.pages.dev/. `npm run check:release` potvrđuje da svih 8 HTTPS datoteka odgovara lokalnom buildu: glavni JS `index-Dkj5lM1t.js`, editor `NoteEditor-De1NsSEG.js`, CSS `index-Bqmg0GBs.css`. Baza i korisnički sadržaj nisu mijenjani.
 
 ## Checkbox unos i ručno proširivanje kategorija — 31. 10. 2026.
 

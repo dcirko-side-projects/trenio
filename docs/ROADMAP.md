@@ -118,5 +118,5 @@ Lokalno prolaze 25 domenskih, 54 UI i 16 izoliranih API/UI provjera, lint, tipov
 - [x] Primijeniti #2A2A2A / #C0C0C0 / #E10600 uz neutralne površine i diskretne naglaske.
 - [x] Ukloniti automatsko fokusiranje tekstualnih polja pri otvaranju svih vrsta sadržaja, kategorija, pretrage i poveznica.
 - [x] Provjeriti kontraste, mobilni/desktop raspored, unos, tipkovničku navigaciju i postojeće tokove spremanja/grešaka.
-- [ ] Objaviti pripremljeni frontend na postojeći Pages projekt i provjeriti datoteke; korisnik je izričito odobrio commit, push i objavu nakon početne blokade.
+- [x] Nakon korisnikove izričite potvrde commitati, pushati i objaviti frontend na postojeći Pages projekt: `75ffd65`, deployment `0ccd020d`; svih 8 HTTPS datoteka odgovara buildu.
 - [ ] Potvrditi ponašanje tipkovnice na fizičkom Samsungu; automatizirano prolaze 63 UI provjere.
