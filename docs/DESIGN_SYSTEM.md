@@ -88,3 +88,7 @@ Birač i pretraga koriste 16 px polja radi mobilnog unosa. Checkbox u editoru im
 Otvaranje novog ili postojećeg zadatka, bilješke, plana, ideje, kategorije i pretrage ne fokusira tekstualno polje. Naslov dijaloga je programski fokusabilan; Tab, Shift+Tab, Escape, modalnost i povratak pokretaču ostaju dostupni. Editor izričito isključuje autofocus. Formatiranje čuva aktivan odabir, ali ne fokusira neaktivni editor. Unos poveznice je ugrađeni obrazac bez automatskog fokusa, s lokalnom validacijom i radnjama Primijeni/Zatvori; prazna adresa uklanja poveznicu.
 
 Pohranjene oznake šest kategorijskih boja ostaju kompatibilne s bazom i kopijama. `categoryDisplayColor` ih prikazuje tamnijim, prigušenim tonovima na svijetloj podlozi; iste tonove koriste ikone i uzorci birača. Kontrasti ikona na bijeloj su najmanje 5,67:1. To nije migracija korisničkih podataka.
+
+## Dorada aplikacijske ikone — 1. 11. 2026.
+
+Znak t ima širi potez i veću crvenu točku radi čitljivosti na malim veličinama. Pozadina ostaje #F5F5F5, znak #2A2A2A, točka #E10600; simbol ostaje unutar središnje sigurne zone maskable ikone. SVG je izvor za PNG 192/512 px. Favicon, Apple touch i ikone u manifestu koriste oznaku ?v=2 radi osvježavanja predmemorirane slike. Tekstualni naziv trenio u sučelju ostaje isti.

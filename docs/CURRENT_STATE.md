@@ -2,6 +2,13 @@
 
 Ažurirano: 1. 11. 2026.
 
+## Dorada loga aplikacije — 1. 11. 2026. (pripremljeno za objavu)
+
+- Na korisnikov zahtjev ažuriran je postojeći SVG znak t: veći, širi potez i izraženija crvena točka, uz paletu #2A2A2A/#E10600 na #F5F5F5. Ponovno su izvezeni PNG-ovi 192/512 px i vizualno pregledana ikona 192 px. Znak ostaje u sigurnoj zoni za maskable izrezivanje.
+- Favicon, Apple touch i manifest koriste ?v=2 kako URL nove ikone ne bi bio isti kao prethodni. Identitet i početni URL PWA aplikacije ostaju isti; vrijeme promjene već instalirane ikone ovisi o pregledniku/OS-u i nije potvrđeno na fizičkom Samsungu.
+- Prolaze lint, TypeScript/build, provjera PNG dimenzija, postojanja putanja i URL oznaka te git diff --check. Promjena je ograničena na ikone, HTML reference, manifest i dokumentaciju; prethodne domenske/UI testne grupe nisu ponovno pokretane za ovu doradu resursa.
+- Korisnik je izričito zatražio commit, push i deploy; objava slijedi nakon commita i pusha.
+
 ## Neutralna paleta i otvaranje bez tipkovnice — 1. 11. 2026. (objavljeno)
 
 - Primijenjena je korisnikova nova paleta: #2A2A2A za tekst, znak i glavne gumbe, #C0C0C0 za diskretne obrube, #E10600 za male naglaske i aktivna stanja. Većina sučelja koristi neutralne #F5F5F5/#FFFFFF površine. Usklađeni su navigacija, obrasci, dijalozi, toolbar, greške, manifest, theme-color i SVG/PNG PWA ikone.
