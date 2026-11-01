@@ -7,8 +7,8 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#03313A",
-  "theme_color": "#03313A",
+  "background_color": "#F5F5F5",
+  "theme_color": "#F5F5F5",
   "prefer_related_applications": false,
   "icons": [
     { "src": "/icons/trenio-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

@@ -1,6 +1,12 @@
 import type { Category } from './domain'
 
 export const categoryColors = ['#B4D6D3', '#8FFFE0', '#A8C9F5', '#EDCF97', '#D5BBE9', '#F0B8B1']
+// Preserve stored color IDs and backup compatibility; adapt their display to light surfaces.
+export function categoryDisplayColor(color?: string): string {
+  const tones: Record<string, string> = { '#B4D6D3': '#626262', '#8FFFE0': '#28715E', '#A8C9F5': '#386799', '#EDCF97': '#86601D', '#D5BBE9': '#795391', '#F0B8B1': '#A34740' }
+  return tones[color ?? categoryColors[0]] ?? '#626262'
+}
+
 export const categoryIcons = ['folder', 'briefcase', 'graduation-cap', 'house', 'wallet', 'lightbulb', 'code', 'heart', 'book-open', 'target', 'plane', 'music', 'calendar', 'shopping-bag', 'dumbbell', 'coffee']
 export function siblings(categories: Category[], parentId: string | null = null): Category[] {
   return categories.filter(category => (category.parentId ?? null) === parentId)

@@ -112,3 +112,11 @@ Sve nadogradnje trebaju zadržati brz unos, mobilni prioritet i jednostavnu navi
 - [ ] Potvrditi ponašanje fizičke Samsung tipkovnice; automatizirani testovi ne mogu dokazati stanje njezina Shift/Caps načina.
 
 Lokalno prolaze 25 domenskih, 54 UI i 16 izoliranih API/UI provjera, lint, tipovi/build i 5 SQL skripti. Produkcijska migracija je primijenjena; deployment 5d3a283f i svih 8 datoteka potvrđeni su. Stvarni SQL/UI tokovi i prazne zbirke nakon odobrenog čišćenja potvrđeni su.
+
+## 7. Paleta i početni fokus — odobreno 1. 11. 2026.
+
+- [x] Primijeniti #2A2A2A / #C0C0C0 / #E10600 uz neutralne površine i diskretne naglaske.
+- [x] Ukloniti automatsko fokusiranje tekstualnih polja pri otvaranju svih vrsta sadržaja, kategorija, pretrage i poveznica.
+- [x] Provjeriti kontraste, mobilni/desktop raspored, unos, tipkovničku navigaciju i postojeće tokove spremanja/grešaka.
+- [ ] Objaviti pripremljeni frontend na postojeći Pages projekt i provjeriti datoteke; korisnik je izričito odobrio commit, push i objavu nakon početne blokade.
+- [ ] Potvrditi ponašanje tipkovnice na fizičkom Samsungu; automatizirano prolaze 63 UI provjere.

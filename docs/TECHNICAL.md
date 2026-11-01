@@ -127,7 +127,7 @@ RPC provjerava vlasnika i verziju, zaključava izvor, uzima cijeli otvoreni nacr
 
 Brisanje zadatka prije brisanja uklanja njegov taskId iz svih izvora i čuva checked. Brisanje čvora/izvora samo uklanja referencu iz dokumenta; samostalni zadatak ostaje u tasks. RLS i vlasništvo ostaju postojeći; RPC je security definer s praznim search_path, izričitom provjerom vlasnika i bez prava anon/public. Privatne funkcije nisu dostupne kroz API. `202610280004_content_text.sql` čuva cijele riječi preko inline formatiranja pri imenovanju zadatka.
 
-Tiptap proširenje čuva atribut taskId pri uređivanju. Sučelje prikazuje povezivanje/otvaranje uz svaki checkbox, traži prvo spremanje novog izvora i blokira unos tijekom RPC-a. Prelazak na povezani zapis zahtijeva spremljen izvor i fokusira naslov novog dijaloga. Demo koristi iste domenske pomoćne funkcije za usklađivanje stanja, bez trajne pohrane.
+Tiptap proširenje čuva atribut taskId pri uređivanju. Sučelje prikazuje povezivanje/otvaranje uz svaki checkbox, traži prvo spremanje novog izvora i blokira unos tijekom RPC-a. Prelazak na povezani zapis zahtijeva spremljen izvor i fokusira statički naslov novog dijaloga. Demo koristi iste domenske pomoćne funkcije za usklađivanje stanja, bez trajne pohrane.
 
 Format 4 kopije čuva veze u tijelu i provjerava jedinstvenost, postojanje cilja i podudaranje dovršenosti. Neusklađen izvoz se odbija; svježi dohvat triju zbirki i dalje nije transakcijski snapshot pa treba ponoviti izvoz ako se istodobno uređuje na drugom uređaju. Oporavak prvo unosi zadatke pa sadržaj. Privremeni klonovi nemaju produkcijske okidače; provjere punog tijela i zadataka te validacija kopije potvrđuju očuvanje veze.
 
@@ -152,3 +152,9 @@ Migracija `202610300001_category_hierarchy.sql`, primijenjena 30. 10. 2026., pro
 Editor koristi memoizirana proširenja i editorProps te nepromjenjiv početni dokument unutar jedne verzije nacrta. React i dalje prima promjene tijela, ali tipkanje više ne poziva setOptions na svakoj transakciji. Pointer na alatnoj traci čuva postojeći fokus/odabir; tipkovnički Tab ostaje dostupan. Od 31. 10. kapitalizacija je eksplicitno off zbog ponovljene korisničke prijave neželjenih velikih slova uz checkboxove; spellcheck ostaje true. taskId ima keepOnSplit:false, pa Enter ne duplicira vezu. Instrumentirani UI testovi mjere pozive setOptions, blur, identitet DOM-a i rezultat unosa. Fizički mobilni IME nije emuliran.
 
 Izolirana nadogradnja stvarne kopije i SQL testovi prošli su u PGliteu, bez izmjene produkcije. Nakon početne automatske blokade korisnik je izričito odobrio produkcijsku vježbu, primjenu migracije i objavu. Vježba, migracija, dodatne transakcijske SQL provjere i stvarni frontend tokovi prošli su. Svih 8 datoteka deploymenta 5d3a283f odgovara buildu. Prema dodatnom izričitom zahtjevu svi vlasnički sadržaji i kategorije obrisani su atomskom transakcijom nakon validacije kopije; Auth i app_owner ostaju sačuvani. Trenutačno su sve tri zbirke prazne.
+
+## Paleta i fokus — 1. 11. 2026.
+
+CSS koristi svijetle neutralne tokene i color-scheme:light. HTML theme-color, manifest, SVG i PNG PWA ikone usklađeni su s novom paletom. Nema novih ovisnosti ni izmjena baze. Spremljene kategorijske boje prevode se samo pri prikazu, radi kompatibilnosti s postojećim kopijama i SQL ograničenjima.
+
+Nativni showModal odabire statički naslov s tabIndex=-1 i autofocus, bez prolaznog fokusa tekstualnog polja; prelazak između povezanih zapisa također fokusira naslov. Pretraga fokusira naslov ekrana. Tiptap ima autofocus:false, a alatna traka ne poziva focus(). Ugrađeni obrazac poveznice zamjenjuje window.prompt, čuva Tiptap odabir i provjerava URL prije promjene dokumenta.

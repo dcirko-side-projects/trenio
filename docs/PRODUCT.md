@@ -95,3 +95,7 @@ Najviše dvije razine: kategorija može imati svoj sadržaj i podkategorije. Naz
 Brisanje podkategorije čuva njezin sadržaj u Bez kategorije. Brisanje roditelja čuva njegove podkategorije kao samostalne kategorije sa svojim sadržajem; samo izravni sadržaj roditelja prelazi u Bez kategorije. Ako naziv promovirane kategorije već postoji, dodaje se kratak ID dodatak. Redoslijed se bira pristupačnim poljem u obrascu; povlačenje nije potrebno za uporabu na mobitelu.
 
 Nadogradnja je nakon izričitog odobrenja primijenjena i objavljena 30. 10. 2026. Korisnik je zatim zatražio čišćenje postojećeg sadržaja: svi zapisi i kategorije obrisani su uz prethodno validiranu lokalnu kopiju, a račun i prijava su sačuvani.
+
+## Vizualna paleta i početni fokus — 1. 11. 2026.
+
+Korisnik je zatražio primarnu #2A2A2A, sekundarnu #C0C0C0 i naglasnu #E10600, uz neutralne površine i štedljivo korištenje naglasaka. Otvaranje sadržaja, kategorija, pretrage i obrazaca ne aktivira tekstualno polje; korisnik sam bira polje za unos. Tipkovnička navigacija ostaje dostupna. Detalji su u DESIGN_SYSTEM.md.

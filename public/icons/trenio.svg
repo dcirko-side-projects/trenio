@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title">
   <title id="title">Trenio</title>
-  <rect width="512" height="512" fill="#03313A"/>
-  <path d="M236 156v152c0 32 16 48 45 48h30v-40h-25c-11 0-15-6-15-18V156zm-48 52v40h132v-40z" fill="#8FFFE0"/>
-  <circle cx="346" cy="342" r="13" fill="#8FFFE0"/>
+  <rect width="512" height="512" fill="#F5F5F5"/>
+  <path d="M236 156v152c0 32 16 48 45 48h30v-40h-25c-11 0-15-6-15-18V156zm-48 52v40h132v-40z" fill="#2A2A2A"/>
+  <circle cx="346" cy="342" r="13" fill="#E10600"/>
 </svg>
