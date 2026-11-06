@@ -2,11 +2,11 @@
 
 Ažurirano: 6. 11. 2026.
 
-## Redoslijed u Trenutno — 6. 11. 2026. (lokalno)
+## Redoslijed u Trenutno — 6. 11. 2026. (objavljeno)
 
 - Na korisnikov zahtjev sekcije taba Trenutno sada idu redom: zadaci, bilješke, ideje, planovi. Promjena je ograničena na taj tab; prazne sekcije sadržaja i dalje se skrivaju.
 - Prolaze lint, TypeScript/build, 25 domenskih testova i privremena UI provjera redoslijeda, tipkovničkog odabira taba, uklanjanja prikvačivanja i skrivanja prazne sekcije na 320/390/1366 px. Mobilna i desktop snimka vizualno su pregledane; nema horizontalnog prelijevanja. Početni sandbox pokušaj zaustavljen je zbog nedostupnosti lokalnog poslužitelja; ponovljena provjera izvan sandboxa prolazi nakon ispravka testne pretpostavke o postojećoj demo bilješci.
-- Izmjena nije objavljena na produkciji.
+- Korisnik je zatražio commit, push i objavu. Implementacija je commitana kao `7cc18b8` i pushana na `origin/main`; mapa lokalnih privitaka isključena je iz verzioniranja. Wrangler 4.154.0 objavio je deployment https://0c222bf5.trenio.pages.dev/ na https://trenio.pages.dev/. `npm run check:release` potvrđuje jednakost svih 8 produkcijskih datoteka s lokalnim buildom. Baza i korisnički sadržaj nisu mijenjani.
 
 ## Dorada loga aplikacije — 1. 11. 2026. (objavljeno)
 
