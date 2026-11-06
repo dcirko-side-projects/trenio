@@ -1,6 +1,12 @@
 # Trenio — trenutačno stanje
 
-Ažurirano: 1. 11. 2026.
+Ažurirano: 6. 11. 2026.
+
+## Redoslijed u Trenutno — 6. 11. 2026. (lokalno)
+
+- Na korisnikov zahtjev sekcije taba Trenutno sada idu redom: zadaci, bilješke, ideje, planovi. Promjena je ograničena na taj tab; prazne sekcije sadržaja i dalje se skrivaju.
+- Prolaze lint, TypeScript/build, 25 domenskih testova i privremena UI provjera redoslijeda, tipkovničkog odabira taba, uklanjanja prikvačivanja i skrivanja prazne sekcije na 320/390/1366 px. Mobilna i desktop snimka vizualno su pregledane; nema horizontalnog prelijevanja. Početni sandbox pokušaj zaustavljen je zbog nedostupnosti lokalnog poslužitelja; ponovljena provjera izvan sandboxa prolazi nakon ispravka testne pretpostavke o postojećoj demo bilješci.
+- Izmjena nije objavljena na produkciji.
 
 ## Dorada loga aplikacije — 1. 11. 2026. (objavljeno)
 

@@ -312,7 +312,7 @@ export function App() {
               <button disabled={busy} className={task.pinned ? 'icon-button pin-button pinned' : 'icon-button pin-button'} aria-label={`${task.pinned ? 'Ukloni iz Trenutno' : 'Prikvači u Trenutno'}: ${task.title}`} aria-pressed={task.pinned} onClick={() => void run(() => persist('task', { ...task, pinned: !task.pinned }))}><Pin size={16} /></button>
             </div>)}
           </section>
-          {(['plan', 'idea', 'note'] as const).map(kind => {
+          {(view === 'overview' && tab === 'pinned' ? ['note', 'idea', 'plan'] as const : ['plan', 'idea', 'note'] as const).map(kind => {
             const items = notes.filter(note => note.kind === kind)
             const label = kind === 'plan' ? 'Planovi' : kind === 'idea' ? 'Ideje' : 'Bilješke'
             return items.length > 0 && <section className={`content-section notes-list content-${kind}`} aria-label={label} key={kind}><SectionHeading kind={kind} label={label} count={items.length} />{items.map(note => <button className="note-row" key={note.id} onClick={() => openDraft({ kind: 'note', item: note })}>{kind === 'plan' ? <ListTodo size={21} /> : kind === 'idea' ? <Lightbulb size={21} /> : <FileText size={21} />}<span>{note.title}<small><CategoryIcon category={data.categories.find(row => row.id === note.categoryId)} size={12} /> {categoryName(note.categoryId)}{view === 'search' && note.archivedAt ? ' · Arhivirano' : ''}</small>{kind === 'plan' && <PlanProgress body={note.body} />}</span><ArrowUpRight size={17} /></button>)}</section>

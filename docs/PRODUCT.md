@@ -16,7 +16,7 @@ Glavna navigacija: Pregled, Kategorije i brzo dodavanje. Pregled ima samo tabove
 - Zadatak ima naziv, opcionalni planirani datum i zaseban opcionalni rok. Podržava uređivanje, brisanje, dovršavanje, arhivu, vraćanje i prikvačivanje.
 - Naziv je dovoljan za unos zadatka. Predloženo razrješenje kategorije: neobavezna kategorija, prikaz Bez kategorije, a pri unosu unutar kategorije ona je unaprijed odabrana.
 - Danas prikazuje aktivne zadatke planirane za danas, s današnjim rokom i s isteklim rokom. Jedan zadatak prikazuje se samo jednom unutar tog taba.
-- Trenutno prikazuje ručno prikvačene zadatke, planove, ideje i bilješke. Uklanjanje prikvačivanja ne briše izvornu stavku. Prikazi referenciraju isti zapis.
+- Trenutno prikazuje ručno prikvačeni sadržaj redom: zadaci, bilješke, ideje, planovi. Uklanjanje prikvačivanja ne briše izvornu stavku. Prikazi referenciraju isti zapis.
 - Dovršeni zadaci nestaju iz aktivnih prikaza i dostupni su u arhivi. Vraćanje ponovno aktivira isti zapis.
 - Bilješke podržavaju tekst, naslove, osnovno formatiranje, liste, linkove i checkliste. Postojeći redak može se pretvoriti u checkbox i označiti dovršenim.
 - Checkbox nije automatski samostalan zadatak. Može izričito stvoriti povezani zadatak.
