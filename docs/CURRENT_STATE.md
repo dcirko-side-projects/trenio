@@ -1,6 +1,14 @@
 # Trenio — trenutačno stanje
 
-Ažurirano: 6. 11. 2026.
+Ažurirano: 10. 11. 2026.
+
+## Povratak na prethodni prikaz — 10. 11. 2026.
+
+- Na korisnikov zahtjev dodana je povijest navigacije za sistemski Natrag/Naprijed: ekrani, tabovi, kategorije (uključujući Bez kategorije) i otvoreni zapisi. Vraćaju se upit/filtar pretrage, proširene podkategorije, pomicanje i dostupan pokretač fokusa. Izričiti ulazak u Kategorije/Sve kategorije zadržava početno sažimanje.
+- Zatvaranje, Escape i uspješno spremanje obrasca vraćaju prethodni korak; iz povezanog zadatka vraća se izvorni zapis s aktualnim podacima. Nespremljeni sadržaj traži potvrdu, a tijekom spremanja povratak je blokiran. Na samom početnom prikazu ostaje normalni izlazak preglednika. Povijest traje do osvježavanja ili odjave; privatni sadržaj nije zapisan u URL ni browser history state.
+- Prolaze lint, TypeScript/build, 25 domenskih testova, svih 75 UI provjera na 320/390/1366 px te 16 izoliranih API/UI provjera. Provjereni su Natrag/Naprijed, odbijanje odbacivanja, povratak tijekom sporog/neuspješnog spremanja, povezani zapisi, prazan prikaz, Bez kategorije i vraćanje pomicanja/proširenja. Mobilne i desktop snimke vizualno su pregledane; nema horizontalnog prelijevanja.
+- Početni sandbox pokušaj nije imao pristup lokalnom poslužitelju; ponovljene provjere s potrebnim pristupom prolaze. Stari test povezanog zapisa usklađen je s novim vraćanjem na izvor; test dugog popisa otkrio je i potvrdio ispravak pamćenja pomicanja prije skraćivanja DOM-a. Fizička Android/PWA gesta nije dostupna u ovom okruženju. Nema promjene baze ni produkcijskog sadržaja.
+- Korisnik je izričito zatražio commit, push i deploy; provjere prije objave završene su.
 
 ## Redoslijed u Trenutno — 6. 11. 2026. (objavljeno)
 

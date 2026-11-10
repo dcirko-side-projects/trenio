@@ -92,3 +92,7 @@ Pohranjene oznake šest kategorijskih boja ostaju kompatibilne s bazom i kopijam
 ## Dorada aplikacijske ikone — 1. 11. 2026.
 
 Znak t ima širi potez i veću crvenu točku radi čitljivosti na malim veličinama. Pozadina ostaje #F5F5F5, znak #2A2A2A, točka #E10600; simbol ostaje unutar središnje sigurne zone maskable ikone. SVG je izvor za PNG 192/512 px. Favicon, Apple touch i ikone u manifestu koriste oznaku ?v=2 radi osvježavanja predmemorirane slike. Tekstualni naziv trenio u sučelju ostaje isti.
+
+## Povratak na prethodno stanje — 10. 11. 2026.
+
+Sistemski Natrag vraća prethodni prikaz i njegov položaj pomicanja, upit, filtar, tab i proširene podkategorije. Izričito otvaranje Kategorija ili Sve kategorije i dalje počinje sa sažetim podkategorijama. Zatvori, Escape i uspješno spremanje obrasca vraćaju prethodni korak, uključujući izvorni zapis nakon otvaranja povezanog zadatka. Početni fokus ostaje na statičkom naslovu; povratak vraća dostupni pokretač bez automatskog otvaranja tipkovnice.

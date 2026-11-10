@@ -99,3 +99,7 @@ Nadogradnja je nakon izričitog odobrenja primijenjena i objavljena 30. 10. 2026
 ## Vizualna paleta i početni fokus — 1. 11. 2026.
 
 Korisnik je zatražio primarnu #2A2A2A, sekundarnu #C0C0C0 i naglasnu #E10600, uz neutralne površine i štedljivo korištenje naglasaka. Otvaranje sadržaja, kategorija, pretrage i obrazaca ne aktivira tekstualno polje; korisnik sam bira polje za unos. Tipkovnička navigacija ostaje dostupna. Detalji su u DESIGN_SYSTEM.md.
+
+## Povratak unutar aplikacije — 10. 11. 2026.
+
+Tipka/gesta Natrag prati prethodne prikaze, tabove, kategorije i otvorene zapise unutar te sesije aplikacije. Povratak čuva upit i filtar pretrage, proširene podkategorije te položaj pomicanja. Zatvaranje ili uspješno spremanje povezanog zapisa vraća prethodno otvoreni zapis; obični obrazac vraća polazni popis. Nespremljene promjene sadržaja traže potvrdu odbacivanja, a povratak tijekom spremanja ostaje blokiran. Na početnom prikazu, bez prethodnih koraka, preglednik zadržava svoje normalno ponašanje izlaska. Osvježavanje ili odjava završavaju memorijsku povijest aplikacije.
