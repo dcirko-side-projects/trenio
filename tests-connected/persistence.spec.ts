@@ -121,7 +121,13 @@ test('spremljeni zadatak se ponovno učita, a zastarjela izmjena čuva unos', as
   await page.getByRole('button', { name: 'Spremi', exact: true }).click()
   await expect(page.getByRole('alert')).toContainText('promijenjena na drugom uređaju')
   await expect(page.getByLabel('Naziv zadatka')).toHaveValue('Moj nespremljeni unos')
-  expect(state.tasks[0].title).toBe('Novija izmjena')
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+  await expect(page.getByRole('alert')).toContainText('promijenjena na drugom uređaju')
+  await page.getByRole('button', { name: 'Prikaži spremljenu verziju' }).click()
+  await expect(page.getByRole('dialog').getByText('Novija izmjena', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Spremi nacrt kao zasebnu kopiju' }).click()
+  await expect(page.getByRole('dialog')).not.toBeVisible()
+  expect(state.tasks.map(row => row.title)).toEqual(['Novija izmjena', 'Moj nespremljeni unos'])
 })
 
 test('uspješan zapis s greškom naknadnog dohvata zadržava upozorenje', async ({ page }) => {

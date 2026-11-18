@@ -24,7 +24,7 @@ Otvori adresu koju Vite ispiše, uobičajeno http://127.0.0.1:5173. Probni prika
 Projekt `trenio` već je povezan lokalnim `.env` postavkama, sve migracije su primijenjene i stvarni vlasnički račun je dodijeljen. Koraci ispod služe za novu okolinu; početnu migraciju ne pokretati ponovno na postojećoj bazi.
 
 1. Kreiraj novi Supabase projekt za Trenio. Lozinku baze spremi u upravitelj lozinki; nije potrebna u frontend aplikaciji.
-2. U SQL Editoru primijeni redom `supabase/migrations/202610250001_initial.sql`, `supabase/migrations/202610280001_plans.sql`, `supabase/migrations/202610280002_ideas.sql`, `supabase/migrations/202610280003_linked_tasks.sql`, `supabase/migrations/202610280004_content_text.sql` i `supabase/migrations/202610280005_canonical_links.sql`, svaku jednom, na novom projektu.
+2. U SQL Editoru primijeni redom `supabase/migrations/202610250001_initial.sql`, `supabase/migrations/202610280001_plans.sql`, `supabase/migrations/202610280002_ideas.sql`, `supabase/migrations/202610280003_linked_tasks.sql`, `supabase/migrations/202610280004_content_text.sql`, `supabase/migrations/202610280005_canonical_links.sql` i `supabase/migrations/202610300001_category_hierarchy.sql`, svaku jednom, na novom projektu.
 3. U Authentication kreiraj vlasnički račun s emailom i lozinkom. Isključi javnu registraciju u postavkama Autha.
 4. Kopiraj ID tog Auth korisnika i u SQL Editoru upiši stvarni UUID umjesto oznake ispod:
 
@@ -80,7 +80,7 @@ Nakon objave provjeri HTTPS adresu, vlasničku prijavu i spremanje na oba uređa
 
 ## Podaci i izvoz
 
-Izbornik s tri točke dohvaća svježe podatke i priprema JSON izvoz formata 4 s vrstom bilješke/plana/ideje, uključujući arhivu, verziju formata i oznaku probnih podataka. Kod greške dohvata ili validacije ne stvara se prazna kopija. Datoteka sadrži privatni sadržaj pa je čuvaj na sigurnom mjestu odvojenom od uređaja na kojem radiš.
+Izbornik s tri točke dohvaća svježe podatke i priprema JSON izvoz formata 5 s vrstom bilješke/plana/ideje, uključujući arhivu, verziju formata i oznaku probnih podataka. Kod greške dohvata ili validacije ne stvara se prazna kopija. Datoteka sadrži privatni sadržaj pa je čuvaj na sigurnom mjestu odvojenom od uređaja na kojem radiš.
 
 Za pripremu provjere oporavka koristi Node 24, na kojem je alat provjeren:
 

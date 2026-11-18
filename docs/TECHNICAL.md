@@ -32,7 +32,7 @@ Povratak se prati i preko `visibilitychange` događaja, što pokriva ponovno otv
 
 ## Implementirani logički model
 
-Početna SQL shema je u `supabase/migrations/202610250001_initial.sql`; ručno je primijenjena kroz SQL Editor. Ne pokretati je ponovno na postojećoj bazi. Prije eventualnog uvođenja CLI migracija potrebno je uskladiti povijest migracija jer izvršavanje kroz SQL Editor nije CLI evidencija. Postoje kategorije, zadaci i sadržaj (notes.kind: note/plan/idea); povezivanje je atribut unutar JSON tijela prema odjeljku niže. Svih šest migracija je primijenjeno.
+Početna SQL shema je u `supabase/migrations/202610250001_initial.sql`; ručno je primijenjena kroz SQL Editor. Ne pokretati je ponovno na postojećoj bazi. Prije eventualnog uvođenja CLI migracija potrebno je uskladiti povijest migracija jer izvršavanje kroz SQL Editor nije CLI evidencija. Postoje kategorije, zadaci i sadržaj (notes.kind: note/plan/idea); povezivanje je atribut unutar JSON tijela prema odjeljku niže. Aktualni redoslijed svih sedam migracija nalazi se u README-u.
 
 | Entitet | Ključni podaci i odnosi |
 |---|---|
@@ -88,9 +88,9 @@ Preporuka stacka je procjena za ovaj projekt, a ne tvrdnja da dokumentacija pru�
 
 Nadogradnja planova od 28. 10. koristi novu migraciju `202610280001_plans.sql`: `notes.kind` razdvaja bilješke i planove uz iste RLS politike, verzije i atomsko brisanje kategorije. Koraci su `taskItem` čvorovi postojećeg Tiptap dokumenta; napredak se računa iz njih i ne sprema kao zaseban broj. Veze sa zadacima dodane su migracijama opisanim niže. Migracija je primijenjena na produkciji nakon uspješne transakcijske vježbe (ROLLBACK). SQL je potvrdio da postojeće bilješke ostaju vrste note.
 
-Izvoz sada koristi format 4 (ideje su uvele format 3) i polje `kind`; parser prihvaća i formate 1/2/3 (format 1 bez vrste čita kao bilješke). Oporavak novim alatom zahtijeva sve migracije. Zadržavanje nove verzije formata sprječava da stari alat obnovi planove kao obične bilješke. Prije objave nove verzije mora se prvo primijeniti aditivna migracija; stariji otvoreni klijenti trebaju ponovno učitati aplikaciju prije rada s planovima ili izvoza.
+Prije uvođenja hijerarhije kategorija izvoz je koristio format 4 (ideje su uvele format 3) i polje `kind`; parser prihvaća i formate 1/2/3 (format 1 bez vrste čita kao bilješke). Oporavak novim alatom zahtijeva sve migracije. Zadržavanje nove verzije formata sprječava da stari alat obnovi planove kao obične bilješke. Prije objave nove verzije mora se prvo primijeniti aditivna migracija; stariji otvoreni klijenti trebaju ponovno učitati aplikaciju prije rada s planovima ili izvoza.
 
-- `src/backup.ts` izvozi format 4, prihvaća formate 1/2/3 i validira tipove, UUID-ove, datume, verzije, jedinstvenost i veze kategorija te podržane čvorove editora i protokole linkova. Granica je 10 MB; probni izvoz ne prihvaća se kao prava kopija.
+- `src/backup.ts` izvozi format 5, prihvaća formate 1–4 i validira tipove, UUID-ove, datume, verzije, jedinstvenost i veze kategorija te podržane čvorove editora i protokole linkova. Granica je 10 MB; probni izvoz ne prihvaća se kao prava kopija.
 - Izvoz dohvaća svježe podatke kroz postojeći klijent. Ne stvara datoteku ako dohvat ili validacija ne uspiju. To nije transakcijski snapshot istodobnih izmjena na više uređaja.
 - `scripts/prepare-recovery.ts` generira SQL u `.local/`, bez ispisivanja privatnog sadržaja. Alat je provjeren na Nodeu 24 i koristi ugrađeno uklanjanje TypeScript tipova.
 - Zadano se oporavak izvodi nad privremenim klonovima tablica s provjerama i vezama, uz ROLLBACK. Taj put je uspješno izveden na stvarnom izvozu.

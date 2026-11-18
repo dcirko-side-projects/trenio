@@ -7,6 +7,8 @@ const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim()
 export const supabase = url && key ? createClient(url, key) : null
 export const configurationIncomplete = Boolean(url) !== Boolean(key)
 
+export class VersionConflict extends Error {}
+
 type TaskRow = { id: string; title: string; category_id: string | null; planned_date: string | null; due_date: string | null; completed_at: string | null; pinned: boolean; version: number }
 type NoteRow = { kind: 'note' | 'plan' | 'idea'; id: string; title: string; category_id: string | null; body: JSONContent; archived_at: string | null; pinned: boolean; version: number }
 
@@ -50,7 +52,7 @@ export async function saveRecord(kind: 'task' | 'note', item: Task | Note, owner
     ? await supabase.from(table).update(payload).eq('id', item.id).eq('version', item.version).select('id').maybeSingle()
     : await supabase.from(table).insert({ ...payload, id: item.id, owner_id: ownerId }).select('id').single()
   if (result.error) throw new Error('Spremanje nije uspjelo. Tvoj unos ostaje ovdje; provjeri vezu i pokušaj ponovno.')
-  if (!result.data) throw new Error('Stavka je promijenjena na drugom uređaju ili izbrisana. Tvoj unos je sačuvan u obrascu. Zatvori ga za dohvat novije verzije ili kopiraj unos prije ponovnog uređivanja.')
+  if (!result.data) throw new VersionConflict('Stavka je promijenjena na drugom uređaju ili izbrisana. Tvoj unos je sačuvan u obrascu. Zatvori ga za dohvat novije verzije ili kopiraj unos prije ponovnog uređivanja.')
 }
 
 export async function deleteRecord(kind: 'task' | 'note', item: Task | Note) {
@@ -64,7 +66,7 @@ export async function deleteRecord(kind: 'task' | 'note', item: Task | Note) {
 export async function createLinkedTask(note: Note, path: number[], taskId: string) {
   if (!supabase) return
   const { error } = await supabase.rpc('create_linked_task', { note_id: note.id, expected_version: note.version, draft: note, item_path: path, task_id: taskId })
-  if (error?.code === '40001') throw new Error('Stavka je promijenjena na drugom uređaju. Tvoj unos je sačuvan; zatvori obrazac za dohvat novije verzije.')
+  if (error?.code === '40001') throw new VersionConflict('Stavka je promijenjena na drugom uređaju. Tvoj unos je sačuvan; zatvori obrazac za dohvat novije verzije.')
   if (error) throw new Error('Povezivanje nije uspjelo. Tvoj unos je sačuvan. Provjeri vezu i pokušaj ponovno; ako je zapis već spremljen, osvježi podatke.')
 }
 

@@ -1,9 +1,20 @@
 import { describe, expect, it } from 'vitest'
-import { createDemo, isTodayTask, planProgress, safeLink, taskGroup, todayInZagreb } from './domain'
+import { compareTodayTasks, createDemo, isTodayTask, planProgress, safeLink, taskGroup, todayInZagreb } from './domain'
 
 describe('kalendarski dan i Danas', () => {
   const today = '2026-10-25'
   const base = createDemo(today).tasks[0]
+  it('sortira Danas prema roku, planiranom danu i naslovu', () => {
+    const tasks = [
+      { ...base, title: 'Danas' },
+      { ...base, title: 'Ranije', plannedDate: '2026-10-23' },
+      { ...base, title: 'Rok danas', dueDate: today },
+      { ...base, title: 'B', dueDate: '2026-10-24' },
+      { ...base, title: 'A', dueDate: '2026-10-24' },
+    ]
+    expect(tasks.sort((a, b) => compareTodayTasks(a, b, today)).map(task => task.title))
+      .toEqual(['A', 'B', 'Rok danas', 'Ranije', 'Danas'])
+  })
   it('računa zagrebački dan preko UTC ponoći i promjene sata', () => {
     expect(todayInZagreb(new Date('2026-10-24T22:30:00Z'))).toBe(today)
     expect(todayInZagreb(new Date('2026-10-25T23:30:00Z'))).toBe('2026-10-26')

@@ -279,3 +279,5 @@ input::placeholder{color:var(--muted);opacity:1}
 .link-fields>div{display:flex;gap:8px;flex-wrap:wrap}
 
 h1[tabindex="-1"]:focus,#draft-heading:focus,#category-heading:focus{outline:none}
+
+.conflict-panel{margin:12px 20px;padding:12px;background:var(--soft);border-radius:8px;overflow-wrap:anywhere;white-space:pre-wrap}

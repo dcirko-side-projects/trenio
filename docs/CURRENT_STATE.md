@@ -1,6 +1,12 @@
 # Trenio — trenutačno stanje
 
-Ažurirano: 10. 11. 2026.
+Ažurirano: 18. 11. 2026.
+
+## Lokalno pripremljene dorade nakon audita — 18. 11. 2026.
+
+Kategorije traže potvrdu odbacivanja promijenjenih polja. Pozadinski dohvat zasebno prati pogreške. Sukob verzije zadatka ili sadržaja omogućuje pregled spremljenog zapisa i spremanje nacrta kao zasebne kopije. Kopirani checkboxovi čuvaju stanje, a veze ostaju uz izvor. Danas sortira prema isteklim rokovima, današnjim rokovima, ranijem planiranju pa današnjem planiranju. U pretrazi točan naslov dobiva prednost unutar vrste sadržaja.
+
+README sada navodi svih sedam migracija i format kopije 5. Na praznom izoliranom PGliteu provedeni su svih sedam migracija, pet SQL provjera i oporavak sintetičke kopije. Lokalno prolaze 75 UI i 16 izoliranih API/UI provjera. Promjene čekaju objavu.
 
 ## Povratak na prethodni prikaz — 10. 11. 2026.
 

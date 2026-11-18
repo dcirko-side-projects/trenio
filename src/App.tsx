@@ -2,8 +2,8 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Archive, ArrowLeft, ArrowUpRight, CalendarDays, Check, Download, FileText, Folder, LayoutList, Lightbulb, ListTodo, LogOut, MoreHorizontal, Pin, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react'
 import type { Session } from '@supabase/supabase-js'
-import { configurationIncomplete, createLinkedTask, deleteRecord, loadData, removeCategory, saveCategory, saveRecord, supabase } from './data'
-import { createDemo, formatDay, isTodayTask, planProgress, taskGroup, todayInZagreb } from './domain'
+import { VersionConflict, configurationIncomplete, createLinkedTask, deleteRecord, loadData, removeCategory, saveCategory, saveRecord, supabase } from './data'
+import { compareTodayTasks, createDemo, formatDay, isTodayTask, planProgress, taskGroup, todayInZagreb } from './domain'
 import type { Category, Data, Note, Task, View } from './domain'
 import { useAppHistory } from './useAppHistory'
 import { CategoryTree } from './CategoryTree'
@@ -31,6 +31,10 @@ export function App() {
   const [busy, setBusy] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [readError, setReadError] = useState('')
+  const [conflictId, setConflictId] = useState<string | null>(null)
+  const [comparison, setComparison] = useState<Task | Note | 'deleted' | null>(null)
+
   const [notice, setNotice] = useState('')
   const [savedDestination, setSavedDestination] = useState<{ categoryId: string | null; name: string } | null>(null)
   const [today, setToday] = useState(todayInZagreb())
@@ -54,9 +58,13 @@ export function App() {
   const demo = !supabase
   const editingId = draft?.item.id
 
+  const [categoryBaseline, setCategoryBaseline] = useState('')
+  const categoryDirty = categoryForm && categoryBaseline !== JSON.stringify([newCategory, categoryParent, categoryIcon, categoryColor, categoryPosition])
+  const unsaved = dirty || categoryDirty
+
   const back = useAppHistory(
     { view, tab, categoryId, query, includeArchived, expandedIds, draft, dirty, categoryForm,
-      newCategory, categoryParent, categoryIcon, categoryColor, categoryPosition, iconQuery, editingCategory, editingCategoryVersion },
+      newCategory, categoryParent, categoryIcon, categoryColor, categoryPosition, iconQuery, editingCategory, editingCategoryVersion, categoryBaseline },
     JSON.stringify([view, tab, categoryId === undefined ? 'all' : categoryId, draft?.item.id, categoryForm]),
     previous => {
       setView(previous.view); setTab(previous.tab); setCategoryId(previous.categoryId)
@@ -65,11 +73,11 @@ export function App() {
       const item = saved && (saved.kind === 'task' ? data.tasks : data.notes).find(item => item.id === saved.item.id)
       setDraft(saved ? item ? { ...saved, item } as Draft : saved.item.version === 0 ? saved : null : null)
       setDirty(Boolean(saved && !item && saved.item.version === 0 && previous.dirty)); setError(''); setCategoryForm(previous.categoryForm)
-      setNewCategory(previous.newCategory); setCategoryParent(previous.categoryParent)
+      setConflictId(null); setComparison(null); setCategoryBaseline(previous.categoryBaseline); setNewCategory(previous.newCategory); setCategoryParent(previous.categoryParent)
       setCategoryIcon(previous.categoryIcon); setCategoryColor(previous.categoryColor); setCategoryPosition(previous.categoryPosition)
       setIconQuery(previous.iconQuery); setEditingCategory(previous.editingCategory); setEditingCategoryVersion(previous.editingCategoryVersion)
     },
-    () => !pending.current && (!dirty || window.confirm('Odbaciti nespremljene promjene?')),
+    () => !pending.current && (!unsaved || window.confirm('Odbaciti nespremljene promjene?')),
     authReady && (demo || Boolean(session)),
   )
   function finishDraft() { setDirty(false); back(true) }
@@ -80,8 +88,8 @@ export function App() {
     setLoading(true)
     try {
       const next = await loadData()
-      if (current === request.current) { setData(next); setError('') }
-    } catch (err) { if (current === request.current) setError(message(err)) }
+      if (current === request.current) { setData(next); setReadError('') }
+    } catch (err) { if (current === request.current) setReadError(message(err)) }
     finally { if (current === request.current) setLoading(false) }
   }, [session])
 
@@ -95,7 +103,7 @@ export function App() {
     })
     const { data: listener } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next); setAuthReady(true)
-      if (!next) { request.current++; setData(empty); setDraft(null); setDirty(false); setLoading(false) }
+      if (!next) { setReadError(''); setConflictId(null); setComparison(null); request.current++; setData(empty); setDraft(null); setDirty(false); setLoading(false) }
     })
     return () => { active = false; listener.subscription.unsubscribe() }
   }, [])
@@ -113,10 +121,10 @@ export function App() {
     return () => { clearInterval(interval); window.removeEventListener('focus', update); window.removeEventListener('online', update); window.removeEventListener('offline', offline); document.removeEventListener('visibilitychange', visible) }
   }, [refresh])
   useEffect(() => {
-    const warn = (event: BeforeUnloadEvent) => { if (dirty) { event.preventDefault(); event.returnValue = '' } }
+    const warn = (event: BeforeUnloadEvent) => { if (unsaved) { event.preventDefault(); event.returnValue = '' } }
     window.addEventListener('beforeunload', warn)
     return () => window.removeEventListener('beforeunload', warn)
-  }, [dirty])
+  }, [unsaved])
   useEffect(() => {
     if (editingId) {
       if (!dialog.current?.open) dialog.current?.showModal()
@@ -141,7 +149,7 @@ export function App() {
     if (!dialog.current?.open && !categoryDialog.current?.open) pageTitle.current?.focus({ preventScroll: true })
   }, [view, categoryId])
 
-  function openDraft(next: Draft) { setError(''); setDirty(false); setDraft(structuredClone(next)) }
+  function openDraft(next: Draft) { setConflictId(null); setComparison(null); setError(''); setDirty(false); setDraft(structuredClone(next)) }
   function closeDraft() {
     if (pending.current) return
     if (dirty && !window.confirm('Odbaciti nespremljene promjene?')) return
@@ -165,7 +173,11 @@ export function App() {
     request.current++
     setLoading(false)
     pending.current = true; setBusy(true); setError(''); setNotice(''); setSavedDestination(null)
-    try { await action(); return true } catch (err) { setError(message(err)); return false }
+    try { await action(); return true } catch (err) {
+      if (err instanceof VersionConflict && draft) { setConflictId(draft.item.id); setComparison(null) }
+      setError(message(err))
+      return false
+    }
     finally { pending.current = false; setBusy(false) }
   }
   async function reloadAfterChange() {
@@ -246,7 +258,9 @@ export function App() {
     setError(''); setEditingCategory(category?.id ?? null); setEditingCategoryVersion(category ? category.version ?? 1 : 0); setNewCategory(category?.name ?? '')
     setCategoryParent(category?.parentId ?? parentId); setCategoryIcon(category?.icon ?? 'folder'); setCategoryColor(category?.color ?? categoryColors[0]); setIconQuery('')
     const group = siblings(data.categories, category?.parentId ?? parentId)
-    setCategoryPosition(category ? group.findIndex(row => row.id === category.id) : group.length)
+    const position = category ? group.findIndex(row => row.id === category.id) : group.length
+    setCategoryPosition(position)
+    setCategoryBaseline(JSON.stringify([category?.name ?? '', category?.parentId ?? parentId, category?.icon ?? 'folder', category?.color ?? categoryColors[0], position]))
     setCategoryForm(true)
   }
   async function deleteCategory() {
@@ -289,6 +303,13 @@ export function App() {
     if (view === 'categories') return categoryId !== undefined && note.categoryId === categoryId
     return tab === 'pinned' && note.pinned
   })
+  if (view === 'overview' && tab === 'today') tasks.sort((a, b) => compareTodayTasks(a, b, today))
+  if (view === 'search' && query.trim()) {
+    const exact = (title: string) => Number(title.trim().localeCompare(query.trim(), 'hr', { sensitivity: 'base' }) === 0)
+    const byTitle = (a: { title: string }, b: { title: string }) => exact(b.title) - exact(a.title) || a.title.localeCompare(b.title, 'hr')
+    tasks.sort(byTitle)
+    notes.sort(byTitle)
+  }
   const sourceNote = draft?.kind === 'task' ? data.notes.find(note => checklistItems(note.body).some(step => step.node.attrs?.taskId === draft.item.id)) : undefined
   const hasCategory = view === 'categories' && categoryId !== undefined
   const title = view === 'search' ? 'Pretraga' : view === 'overview' ? 'Tvoj prostor za danas.' : view === 'archive' ? 'Arhiva' : hasCategory ? categoryName(categoryId!) : 'Kategorije'
@@ -318,6 +339,7 @@ export function App() {
           <div><p className="eyebrow">{view === 'overview' ? new Intl.DateTimeFormat('hr', { dateStyle: 'full', timeZone: 'Europe/Zagreb' }).format(new Date()) : 'TVOJ PROSTOR'}</p><h1 ref={pageTitle} tabIndex={-1}>{title}</h1><p className="subtitle">{view === 'overview' ? 'Ono što je važno, na jednom mjestu.' : view === 'archive' ? 'Dovršeno i sačuvano. Vrati kad zatreba.' : 'Organiziraj na svoj način.'}</p></div>
           <button className="icon-button" aria-label="Otvori pretragu" onClick={() => navigate('search')}><Search size={21} /></button><details className="page-menu" onClick={event => { if (event.target instanceof Element && event.target.closest('button')) event.currentTarget.open = false }}><summary aria-label="Više mogućnosti"><MoreHorizontal size={22} /></summary><div className="popover"><button onClick={() => void exportData()} disabled={busy || loading}><Download size={17} />Izvezi podatke</button><button onClick={() => navigate('archive')}><Archive size={17} />Arhiva</button>{!demo && <><button onClick={() => void refresh()} disabled={busy || loading}><RefreshCw size={17} />Osvježi</button><button onClick={() => void supabase?.auth.signOut().then(({ error }) => { if (error) setError('Odjava nije uspjela.') })}><LogOut size={17} />Odjava</button></>}</div></details>
         </div>
+        {readError && !draft && !categoryForm && <div className="error" role="alert">{readError}<button onClick={() => void refresh()}>Osvježi podatke</button></div>}
         {error && !draft && !categoryForm && <div className="error" role="alert">{error}<button onClick={() => void refresh()}>Pokušaj ponovno</button></div>}
         {notice && <div className="notice"><p role="status">{notice}</p>{savedDestination && <button ref={savedDestinationAction} className="text-button" onClick={() => { const destination = savedDestination; navigate('categories'); setCategoryId(destination.categoryId) }}><Folder size={17} />Otvori kategoriju: {savedDestination.name}<ArrowUpRight size={16} /></button>}</div>}
         {loading && <p className="quiet" role="status">Učitavanje podataka…</p>}
@@ -351,6 +373,29 @@ export function App() {
         <header className="dialog-header"><button type="button" className="icon-button" aria-label="Zatvori uređivanje" onClick={closeDraft} disabled={busy}><X size={21} /></button><h2 id="draft-heading" tabIndex={-1} autoFocus>{draft.kind === 'task' ? 'Zadatak' : draft.item.kind === 'plan' ? 'Plan' : draft.item.kind === 'idea' ? 'Ideja' : 'Bilješka'}</h2><button className="primary-button" type="submit" disabled={busy || !draft.item.title.trim()}>{busy ? 'Spremanje…' : 'Spremi'}</button></header>
         {!online && !demo && <OfflineNotice />}
         {error && <p className="error" role="alert">{error}</p>}
+        {conflictId === draft.item.id && <section className="conflict-panel" aria-label="Oporavak nacrta">
+          <button type="button" className="text-button" disabled={busy} onClick={() => void run(async () => {
+            const latest = await loadData()
+            setData(latest)
+            setComparison((draft.kind === 'task' ? latest.tasks : latest.notes).find(row => row.id === draft.item.id) ?? 'deleted')
+          })}>Prikaži spremljenu verziju</button>
+          {comparison === 'deleted' && <p>Stavka je izbrisana.</p>}
+          {comparison && comparison !== 'deleted' && <div><strong>{comparison.title}</strong>
+            <p>{categoryName(comparison.categoryId)} · {comparison.pinned ? 'Prikvačeno' : 'Nije prikvačeno'}</p>
+            {'body' in comparison ? <><p>{comparison.kind === 'plan' ? 'Plan' : comparison.kind === 'idea' ? 'Ideja' : 'Bilješka'} · {comparison.archivedAt ? 'Arhivirano' : 'Aktivno'}</p><p>{contentText(comparison.body)}</p></> :
+              <p>Planirano: {comparison.plannedDate ?? '—'} · Rok: {comparison.dueDate ?? '—'} · {comparison.completedAt ? 'Dovršeno' : 'Aktivno'}</p>}
+          </div>}
+          <button type="button" className="text-button" disabled={busy || !draft.item.title.trim()} onClick={() => void (async () => {
+            const copy = structuredClone(draft.item)
+            copy.id = crypto.randomUUID()
+            copy.version = 0
+            if ('body' in copy) for (const { node } of checklistItems(copy.body)) {
+              if (node.attrs) delete node.attrs.taskId
+            }
+            if (await run(() => persist(draft.kind, copy))) { finishDraft(); setNotice(current => current || 'Nacrt je spremljen kao zasebna kopija.') }
+          })()}>Spremi nacrt kao zasebnu kopiju</button>
+          {draft.kind === 'note' && <p>Checkboxovi u kopiji čuvaju stanje bez veza na izvorne zadatke.</p>}
+        </section>}
         <fieldset disabled={busy} className="draft-fields">
           <label className="field-label" htmlFor="item-title">{draft.kind === 'task' ? 'Naziv zadatka' : draft.item.kind === 'plan' ? 'Naziv plana' : draft.item.kind === 'idea' ? 'Naziv ideje' : 'Naslov bilješke'}</label>
           <input id="item-title" className="title-input" required maxLength={300} placeholder={draft.kind === 'task' ? 'Što želiš napraviti?' : draft.item.kind === 'plan' ? 'Što želiš ostvariti?' : draft.item.kind === 'idea' ? 'Koja ti je ideja?' : 'Naslov bilješke'} value={draft.item.title} onChange={event => patchDraft({ title: event.target.value })} />
@@ -365,7 +410,7 @@ export function App() {
         }}><Archive size={17} />{draft.item.archivedAt ? 'Vrati iz arhive' : 'Arhiviraj'}</button>}{(draft.kind === 'task' ? data.tasks : data.notes).some(item => item.id === draft.item.id) && <button type="button" className="icon-button danger" aria-label="Izbriši stavku" disabled={busy} onClick={() => void removeDraft()}><Trash2 size={18} /></button>}</div></footer>
       </form>}
     </dialog>
-    <dialog aria-labelledby="category-heading" className="edit-dialog category-dialog" ref={categoryDialog} onCancel={event => { event.preventDefault(); if (!busy) back(true) }}>
+    <dialog aria-labelledby="category-heading" className="edit-dialog category-dialog" ref={categoryDialog} onCancel={event => { event.preventDefault(); if (!busy) back() }}>
       <form onSubmit={event => {
         event.preventDefault()
         if (!newCategory.trim()) return
@@ -383,7 +428,7 @@ export function App() {
           else await reloadAfterChange()
           back(true)
         })
-      }}><h2 id="category-heading" tabIndex={-1} autoFocus>{editingCategory ? 'Uredi kategoriju' : 'Nova kategorija'}</h2>{!online && !demo && <OfflineNotice />}{error && <p className="error" role="alert">{error}</p>}<label>Naziv<input required maxLength={80} value={newCategory} disabled={busy} onChange={event => setNewCategory(event.target.value)} /></label><fieldset className="category-settings" disabled={busy}><label>Nadređena kategorija<select aria-label="Nadređena kategorija" value={categoryParent ?? ''} disabled={Boolean(editingCategory && data.categories.some(row => row.parentId === editingCategory))} onChange={event => { setCategoryParent(event.target.value || null); setCategoryPosition(siblings(data.categories, event.target.value || null).filter(row => row.id !== editingCategory).length) }}><option value="">Bez nadređene kategorije</option>{siblings(data.categories).filter(row => row.id !== editingCategory).map(row => <option key={row.id} value={row.id}>{row.name}</option>)}</select></label>{editingCategory && data.categories.some(row => row.parentId === editingCategory) && <p className="quiet">Kategorija s podkategorijama ostaje na prvoj razini.</p>}<label>Redoslijed<select value={categoryPosition} onChange={event => setCategoryPosition(Number(event.target.value))}>{Array.from({ length: siblings(data.categories, categoryParent).filter(row => row.id !== editingCategory).length + 1 }, (_, index) => <option key={index} value={index}>{index + 1}. mjesto</option>)}</select></label><details className="icon-picker"><summary><CategoryIcon category={{ icon: categoryIcon, color: categoryColor }} />Ikona: {iconLabels[categoryIcon]}</summary><label>Pretraži ikone<input type="search" value={iconQuery} onChange={event => setIconQuery(event.target.value)} /></label><div className="icon-grid">{categoryIcons.filter(icon => matchesSearch(iconQuery, iconLabels[icon], icon)).map(icon => <button type="button" key={icon} aria-label={`Ikona: ${iconLabels[icon]}`} aria-pressed={categoryIcon === icon} onClick={() => setCategoryIcon(icon)}><CategoryIcon category={{ icon, color: categoryColor }} /></button>)}</div>{!categoryIcons.some(icon => matchesSearch(iconQuery, iconLabels[icon], icon)) && <p className="quiet">Nema ikona za ovaj pojam.</p>}</details><div className="color-picker" role="group" aria-label="Boja ikone">{categoryColors.map((color, index) => <button type="button" key={color} aria-label={`Boja: ${['Neutralna', 'Mint', 'Plava', 'Pješčana', 'Ljubičasta', 'Ružičasta'][index]}`} aria-pressed={categoryColor === color} onClick={() => setCategoryColor(color)}><span style={{ background: categoryDisplayColor(color) }} /></button>)}</div></fieldset><div className="category-actions"><button type="button" className="text-button" disabled={busy} onClick={() => { back(true); setError('') }}>Odustani</button><button className="primary-button" disabled={busy || !newCategory.trim()}>{busy ? 'Spremanje…' : editingCategory ? 'Spremi' : 'Dodaj'}</button></div></form>
+      }}><h2 id="category-heading" tabIndex={-1} autoFocus>{editingCategory ? 'Uredi kategoriju' : 'Nova kategorija'}</h2>{!online && !demo && <OfflineNotice />}{error && <p className="error" role="alert">{error}</p>}<label>Naziv<input required maxLength={80} value={newCategory} disabled={busy} onChange={event => setNewCategory(event.target.value)} /></label><fieldset className="category-settings" disabled={busy}><label>Nadređena kategorija<select aria-label="Nadređena kategorija" value={categoryParent ?? ''} disabled={Boolean(editingCategory && data.categories.some(row => row.parentId === editingCategory))} onChange={event => { setCategoryParent(event.target.value || null); setCategoryPosition(siblings(data.categories, event.target.value || null).filter(row => row.id !== editingCategory).length) }}><option value="">Bez nadređene kategorije</option>{siblings(data.categories).filter(row => row.id !== editingCategory).map(row => <option key={row.id} value={row.id}>{row.name}</option>)}</select></label>{editingCategory && data.categories.some(row => row.parentId === editingCategory) && <p className="quiet">Kategorija s podkategorijama ostaje na prvoj razini.</p>}<label>Redoslijed<select value={categoryPosition} onChange={event => setCategoryPosition(Number(event.target.value))}>{Array.from({ length: siblings(data.categories, categoryParent).filter(row => row.id !== editingCategory).length + 1 }, (_, index) => <option key={index} value={index}>{index + 1}. mjesto</option>)}</select></label><details className="icon-picker"><summary><CategoryIcon category={{ icon: categoryIcon, color: categoryColor }} />Ikona: {iconLabels[categoryIcon]}</summary><label>Pretraži ikone<input type="search" value={iconQuery} onChange={event => setIconQuery(event.target.value)} /></label><div className="icon-grid">{categoryIcons.filter(icon => matchesSearch(iconQuery, iconLabels[icon], icon)).map(icon => <button type="button" key={icon} aria-label={`Ikona: ${iconLabels[icon]}`} aria-pressed={categoryIcon === icon} onClick={() => setCategoryIcon(icon)}><CategoryIcon category={{ icon, color: categoryColor }} /></button>)}</div>{!categoryIcons.some(icon => matchesSearch(iconQuery, iconLabels[icon], icon)) && <p className="quiet">Nema ikona za ovaj pojam.</p>}</details><div className="color-picker" role="group" aria-label="Boja ikone">{categoryColors.map((color, index) => <button type="button" key={color} aria-label={`Boja: ${['Neutralna', 'Mint', 'Plava', 'Pješčana', 'Ljubičasta', 'Ružičasta'][index]}`} aria-pressed={categoryColor === color} onClick={() => setCategoryColor(color)}><span style={{ background: categoryDisplayColor(color) }} /></button>)}</div></fieldset><div className="category-actions"><button type="button" className="text-button" disabled={busy} onClick={() => back()}>Odustani</button><button className="primary-button" disabled={busy || !newCategory.trim()}>{busy ? 'Spremanje…' : editingCategory ? 'Spremi' : 'Dodaj'}</button></div></form>
     </dialog>
   </div>
 }
