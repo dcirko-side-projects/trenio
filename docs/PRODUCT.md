@@ -18,6 +18,7 @@ Glavna navigacija: Pregled, Kategorije i brzo dodavanje. Pregled ima samo tabove
 - Danas prikazuje aktivne zadatke planirane za danas, s današnjim rokom i s isteklim rokom. Jedan zadatak prikazuje se samo jednom unutar tog taba.
 - Trenutno prikazuje ručno prikvačeni sadržaj redom: zadaci, bilješke, ideje, planovi. Uklanjanje prikvačivanja ne briše izvornu stavku. Prikazi referenciraju isti zapis.
 - Dovršeni zadaci nestaju iz aktivnih prikaza i dostupni su u arhivi. Vraćanje ponovno aktivira isti zapis.
+- Aktivni zadaci u Danas, Trenutno, kategorijama i pretrazi idu kronološki po roku, od isteklih prema nadolazećima. Zadaci bez roka su na kraju. U Danas se oni dalje redaju po planiranom datumu. U pretrazi naslov odlučuje kod jednakog roka, uz prednost točnog naslova.
 - Bilješke podržavaju tekst, naslove, osnovno formatiranje, liste, linkove i checkliste. Postojeći redak može se pretvoriti u checkbox i označiti dovršenim.
 - Checkbox nije automatski samostalan zadatak. Može izričito stvoriti povezani zadatak.
 - Planovi kombiniraju tekst i korake. Napredak ima smisla samo kada postoje strukturirani koraci. Koraci se mogu povezati sa zadacima.

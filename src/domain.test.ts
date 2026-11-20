@@ -11,9 +11,10 @@ describe('kalendarski dan i Danas', () => {
       { ...base, title: 'Rok danas', dueDate: today },
       { ...base, title: 'B', dueDate: '2026-10-24' },
       { ...base, title: 'A', dueDate: '2026-10-24' },
+      { ...base, title: 'Budući rok', dueDate: '2026-10-26' },
     ]
-    expect(tasks.sort((a, b) => compareTodayTasks(a, b, today)).map(task => task.title))
-      .toEqual(['A', 'B', 'Rok danas', 'Ranije', 'Danas'])
+    expect(tasks.sort(compareTodayTasks).map(task => task.title))
+      .toEqual(['A', 'B', 'Rok danas', 'Budući rok', 'Ranije', 'Danas'])
   })
   it('računa zagrebački dan preko UTC ponoći i promjene sata', () => {
     expect(todayInZagreb(new Date('2026-10-24T22:30:00Z'))).toBe(today)

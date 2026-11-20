@@ -85,13 +85,14 @@ export function createDemo(today: string): Data {
   }
 }
 
-export function compareTodayTasks(a: Task, b: Task, today: string): number {
-  const rank = (task: Task) => {
-    if (task.dueDate && task.dueDate < today) return 0
-    if (task.dueDate === today) return 1
-    if (task.plannedDate && task.plannedDate < today) return 2
-    return 3
-  }
-  const day = (task: Task) => (rank(task) < 2 ? task.dueDate : task.plannedDate) ?? ''
-  return rank(a) - rank(b) || day(a).localeCompare(day(b)) || a.title.localeCompare(b.title, 'hr') || a.id.localeCompare(b.id)
+export function compareTaskDueDates(a: Task, b: Task): number {
+  if (a.dueDate === b.dueDate) return 0
+  if (!a.dueDate) return 1
+  if (!b.dueDate) return -1
+  return a.dueDate.localeCompare(b.dueDate)
+}
+
+export function compareTodayTasks(a: Task, b: Task): number {
+  const plannedOrder = !a.dueDate && !b.dueDate ? (a.plannedDate ?? '').localeCompare(b.plannedDate ?? '') : 0
+  return compareTaskDueDates(a, b) || plannedOrder || a.title.localeCompare(b.title, 'hr') || a.id.localeCompare(b.id)
 }

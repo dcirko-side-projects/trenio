@@ -41,6 +41,46 @@ test('zadatak ostaje isti kroz Danas, Trenutno, arhivu i vraćanje', async ({ pa
   await expect(page.getByText('Testni zadatak', { exact: true })).toBeVisible()
 })
 
+test('aktivni zadaci slijede rok u svim popisima i promjenom roka mijenjaju mjesto', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-20T12:00:00Z'))
+  await page.goto('/')
+  for (const [name, due] of [
+    ['A bez roka', ''], ['B kasniji', '2026-12-01'], ['C bliži', '2026-11-22'],
+    ['D danas', '2026-11-20'], ['E istekao', '2026-11-19'],
+  ]) {
+    await page.getByRole('button', { name: 'Dodaj zadatak', exact: true }).click()
+    await page.getByLabel('Naziv zadatka').fill(`Rok ${name}`)
+    await page.getByLabel('Krajnji rok').fill(due)
+    await page.getByRole('checkbox', { name: 'Prikvači u Trenutno' }).check()
+    await page.getByRole('button', { name: 'Spremi', exact: true }).click()
+  }
+  const tasks = page.locator('.task-content > span').filter({ hasText: /^Rok / })
+  const initialOrder = ['Rok E istekao', 'Rok D danas', 'Rok C bliži', 'Rok B kasniji', 'Rok A bez roka']
+  await expect(tasks).toHaveText(initialOrder)
+  await page.getByRole('button', { name: 'Trenutno', exact: true }).click()
+  await expect(tasks).toHaveText(initialOrder)
+  await page.getByRole('button', { name: /^Rok A bez roka/ }).click()
+  await page.getByLabel('Krajnji rok').fill('2026-11-18')
+  await page.getByRole('button', { name: 'Spremi', exact: true }).click()
+  const changedOrder = [initialOrder[4], ...initialOrder.slice(0, 4)]
+  await expect(tasks).toHaveText(changedOrder)
+  await page.getByRole('navigation', { name: /Glavna navigacija|Mobilna navigacija/ }).getByRole('button', { name: 'Kategorije' }).click()
+  await page.getByRole('button', { name: /^Bez kategorije/ }).click()
+  await expect(tasks).toHaveText(changedOrder)
+  await page.getByRole('button', { name: 'Dovrši zadatak: Rok A bez roka', exact: true }).click()
+  await expect(tasks).toHaveText(initialOrder.slice(0, 4))
+  await page.getByRole('button', { name: 'Otvori pretragu' }).click()
+  await page.getByLabel('Pretraži sadržaj').fill('Rok')
+  await expect(tasks).toHaveText(initialOrder.slice(0, 4))
+  await page.getByLabel('Uključi arhivu').check()
+  await expect(tasks).toHaveText(initialOrder)
+  await page.locator('summary[aria-label="Više mogućnosti"]').click()
+  await page.locator('.popover').getByRole('button', { name: 'Arhiva', exact: true }).click()
+  await expect(tasks).toHaveText([initialOrder[4]])
+  await page.getByRole('button', { name: 'Vrati zadatak: Rok A bez roka', exact: true }).click()
+  await expect(tasks).toHaveCount(0)
+})
+
 test('bilješka se uređuje, redak pretvara u checkbox i arhivira', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))

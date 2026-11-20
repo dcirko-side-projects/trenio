@@ -89,6 +89,8 @@ Otvaranje novog ili postojećeg zadatka, bilješke, plana, ideje, kategorije i p
 
 Pohranjene oznake šest kategorijskih boja ostaju kompatibilne s bazom i kopijama. `categoryDisplayColor` ih prikazuje tamnijim, prigušenim tonovima na svijetloj podlozi; iste tonove koriste ikone i uzorci birača. Kontrasti ikona na bijeloj su najmanje 5,67:1. To nije migracija korisničkih podataka.
 
+Poveznice u bilješkama, planovima i idejama plave su i podcrtane. Dok tijelo dokumenta nije u fokusu, klik ili dodir otvara poveznicu. Kad se uređuje tekst, klik postavlja pokazivač i omogućuje promjenu adrese ili uklanjanje poveznice u alatnoj traci. Tab i Enter omogućuju otvaranje poveznice tipkovnicom dok je obrazac adrese zatvoren.
+
 ## Dorada aplikacijske ikone — 1. 11. 2026.
 
 Znak t ima širi potez i veću crvenu točku radi čitljivosti na malim veličinama. Pozadina ostaje #F5F5F5, znak #2A2A2A, točka #E10600; simbol ostaje unutar središnje sigurne zone maskable ikone. SVG je izvor za PNG 192/512 px. Favicon, Apple touch i ikone u manifestu koriste oznaku ?v=2 radi osvježavanja predmemorirane slike. Tekstualni naziv trenio u sučelju ostaje isti.

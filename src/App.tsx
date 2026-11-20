@@ -3,7 +3,7 @@ import type { FormEvent } from 'react'
 import { Archive, ArrowLeft, ArrowUpRight, CalendarDays, Check, Download, FileText, Folder, LayoutList, Lightbulb, ListTodo, LogOut, MoreHorizontal, Pin, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react'
 import type { Session } from '@supabase/supabase-js'
 import { VersionConflict, configurationIncomplete, createLinkedTask, deleteRecord, loadData, removeCategory, saveCategory, saveRecord, supabase } from './data'
-import { compareTodayTasks, createDemo, formatDay, isTodayTask, planProgress, taskGroup, todayInZagreb } from './domain'
+import { compareTaskDueDates, compareTodayTasks, createDemo, formatDay, isTodayTask, planProgress, taskGroup, todayInZagreb } from './domain'
 import type { Category, Data, Note, Task, View } from './domain'
 import { useAppHistory } from './useAppHistory'
 import { CategoryTree } from './CategoryTree'
@@ -303,13 +303,15 @@ export function App() {
     if (view === 'categories') return categoryId !== undefined && note.categoryId === categoryId
     return tab === 'pinned' && note.pinned
   })
-  if (view === 'overview' && tab === 'today') tasks.sort((a, b) => compareTodayTasks(a, b, today))
-  if (view === 'search' && query.trim()) {
+  if (view === 'overview' && tab === 'today') tasks.sort(compareTodayTasks)
+  else if (view === 'search') {
     const exact = (title: string) => Number(title.trim().localeCompare(query.trim(), 'hr', { sensitivity: 'base' }) === 0)
     const byTitle = (a: { title: string }, b: { title: string }) => exact(b.title) - exact(a.title) || a.title.localeCompare(b.title, 'hr')
-    tasks.sort(byTitle)
-    notes.sort(byTitle)
-  }
+    const byMatch = query.trim() ? byTitle : () => 0
+    tasks.sort((a, b) => Number(Boolean(a.completedAt)) - Number(Boolean(b.completedAt)) ||
+      (a.completedAt ? 0 : compareTaskDueDates(a, b)) || byMatch(a, b))
+    if (query.trim()) notes.sort(byTitle)
+  } else if (view !== 'archive') tasks.sort(compareTaskDueDates)
   const sourceNote = draft?.kind === 'task' ? data.notes.find(note => checklistItems(note.body).some(step => step.node.attrs?.taskId === draft.item.id)) : undefined
   const hasCategory = view === 'categories' && categoryId !== undefined
   const title = view === 'search' ? 'Pretraga' : view === 'overview' ? 'Tvoj prostor za danas.' : view === 'archive' ? 'Arhiva' : hasCategory ? categoryName(categoryId!) : 'Kategorije'

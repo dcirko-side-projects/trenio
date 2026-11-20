@@ -20,9 +20,10 @@ export function NoteEditor({ body, onChange, disabled, kind = 'note' }: { body: 
   const [linkUrl, setLinkUrl] = useState('')
   const [linkError, setLinkError] = useState('')
   const linkButton = useRef<HTMLButtonElement>(null)
+  const pointerStartedInEditor = useRef(false)
   const extensions = useMemo(() => [StarterKit.configure({
       heading: { levels: [2] },
-      link: { openOnClick: false, autolink: false, isAllowedUri: safeLink },
+      link: { openOnClick: false, autolink: false, isAllowedUri: safeLink, HTMLAttributes: { tabindex: '0' } },
     }), TaskList, LinkedTaskItem.configure({ nested: false })], [])
   // Avoid mobile IME capitalization resets when checklist blocks change around the caret.
   const editorProps = useMemo(() => ({ attributes: { class: 'note-body', 'aria-label': kind === 'plan' ? 'Sadržaj plana' : kind === 'idea' ? 'Sadržaj ideje' : 'Sadržaj bilješke', role: 'textbox', 'aria-multiline': 'true', autocapitalize: 'off', spellcheck: 'true' } }), [kind])
@@ -51,8 +52,9 @@ export function NoteEditor({ body, onChange, disabled, kind = 'note' }: { body: 
     if (!editor || disabled) return
     const url = linkUrl.trim()
     if (url && !safeLink(url)) { setLinkError('Upiši valjanu http, https ili mailto adresu.'); return }
-    if (url) editor.chain().extendMarkRange('link').setLink({ href: url }).run()
-    else editor.chain().unsetLink().run()
+    const link = editor.chain().extendMarkRange('link')
+    if (url) link.setLink({ href: url }).run()
+    else link.unsetLink().run()
     closeLink()
   }
   return <div className={disabled ? 'editor is-saving' : 'editor'}>
@@ -79,6 +81,26 @@ export function NoteEditor({ body, onChange, disabled, kind = 'note' }: { body: 
       {linkError && <p className="error" role="alert" id="link-error">{linkError}</p>}
       <div><button type="button" className="primary-button" disabled={disabled} onClick={applyLink}>Primijeni link</button><button type="button" className="text-button" disabled={disabled} onClick={closeLink}>Zatvori postavke linka</button></div>
     </div>}
-    <EditorContent editor={editor} />
+    <EditorContent editor={editor}
+      onPointerDownCapture={() => { pointerStartedInEditor.current = editor.isFocused }}
+      onClick={event => {
+        const anchor = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href]') : null
+        if (!anchor) return
+        event.preventDefault()
+        // Pointer down can focus the editor before click. Use its focus before the gesture.
+        if (disabled || linkOpen || (event.detail > 0 && (pointerStartedInEditor.current || !window.getSelection()?.isCollapsed))) return
+        const url = anchor.getAttribute('href') ?? ''
+        if (safeLink(url)) {
+          anchor.focus({ preventScroll: true })
+          window.open(url, '_blank', 'noopener,noreferrer')
+        }
+      }}
+      onKeyDownCapture={event => {
+        if (event.key !== 'Enter' || !(event.target instanceof HTMLAnchorElement)) return
+        event.preventDefault()
+        event.stopPropagation()
+        event.target.click()
+      }}
+    />
   </div>
 }

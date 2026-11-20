@@ -77,7 +77,7 @@ test('poveznica čuva odabrani tekst bez automatskog fokusa editora', async ({ p
   await expect(body.locator('a')).toHaveText('Odabrani tekst')
   await expect(body.locator('a')).toHaveAttribute('href', 'https://example.com')
   await expect(body).not.toBeFocused()
-  await body.click()
+  await body.focus()
   await body.press('Control+a')
   await page.getByRole('button', { name: 'Dodaj ili ukloni link' }).click()
   await page.getByLabel('Adresa linka', { exact: true }).fill('')
@@ -90,3 +90,58 @@ test('poveznica čuva odabrani tekst bez automatskog fokusa editora', async ({ p
   await expect(page.getByLabel('Adresa linka', { exact: true })).toHaveCount(0)
   await expect(page.getByRole('dialog')).toBeVisible()
 })
+
+for (const [action, title, content] of [
+  ['Nova bilješka', 'Naslov bilješke', 'Sadržaj bilješke'],
+  ['Novi plan', 'Naziv plana', 'Sadržaj plana'],
+  ['Nova ideja', 'Naziv ideje', 'Sadržaj ideje'],
+]) {
+  test(`${action}: spremljena poveznica otvara adresu, a klik u aktivnom editoru uređuje tekst`, async ({ page, context }, testInfo) => {
+    const url = 'https://example.com/trenio-link'
+    await context.route('https://example.com/**', route => route.fulfill({ body: 'Odredište poveznice' }))
+    await page.goto('/')
+    await page.getByRole('button', { name: action, exact: true }).click()
+    await page.getByLabel(title).fill('Provjera otvaranja poveznice')
+    await page.getByRole('checkbox', { name: 'Prikvači u Trenutno' }).check()
+    const body = page.getByRole('textbox', { name: content })
+    await body.fill('Odredište')
+    await body.press('Control+a')
+    const editLink = page.getByRole('button', { name: 'Dodaj ili ukloni link' })
+    await editLink.click()
+    const address = page.getByLabel('Adresa linka')
+    await address.fill('javascript:alert(1)')
+    await address.press('Enter')
+    await expect(page.getByRole('alert')).toContainText('Upiši valjanu')
+    await address.fill(url)
+    await address.press('Enter')
+    await page.getByRole('button', { name: 'Spremi', exact: true }).click()
+    await page.getByRole('button', { name: 'Trenutno', exact: true }).click()
+    await page.getByRole('button', { name: /^Provjera otvaranja poveznice/ }).click()
+
+    const link = body.getByRole('link', { name: 'Odredište' })
+    await expect(link).toHaveAttribute('href', url)
+    await expect(link).toHaveCSS('color', 'rgb(23, 86, 169)')
+    if (action === 'Nova bilješka') await page.screenshot({ path: `.local/ui-review/editor-link-${testInfo.project.name}.png` })
+    const activate = () => testInfo.project.name === 'desktop' ? link.click() : link.tap()
+    const [popup] = await Promise.all([page.waitForEvent('popup'), activate()])
+    await expect(popup).toHaveURL(url)
+    await popup.close()
+
+    await body.focus()
+    await activate()
+    expect(context.pages()).toEqual([page])
+    await editLink.click()
+    await expect(address).toHaveValue(url)
+    const updated = `${url}/novo`
+    await address.fill(updated)
+    await address.press('Enter')
+    await expect(link).toHaveAttribute('href', updated)
+    await page.keyboard.press('Tab')
+    await expect(body).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(link).toBeFocused()
+    const [keyboardPopup] = await Promise.all([page.waitForEvent('popup'), page.keyboard.press('Enter')])
+    await expect(keyboardPopup).toHaveURL(updated)
+    await keyboardPopup.close()
+  })
+}

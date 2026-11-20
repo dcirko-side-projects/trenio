@@ -1,6 +1,12 @@
 # Trenio — trenutačno stanje
 
-Ažurirano: 18. 11. 2026.
+Ažurirano: 20. 11. 2026.
+
+## Poveznice i redoslijed zadataka — 20. 11. 2026.
+
+Zajednički editor bilješki, planova i ideja prikazuje plave, podcrtane poveznice. Klik ili dodir izvan aktivnog uređivanja otvara adresu, dok klik u aktivnom editoru postavlja pokazivač za uređivanje. Aktivni zadaci u Danas, Trenutno, kategorijama i pretrazi sortirani su od najranijeg roka, a zadaci bez roka idu na kraj. Redoslijed se preračunava nakon spremanja i dohvata podataka. Prikaz dovršenih zadataka u arhivi ostaje isti.
+
+Lokalno prolazi 26 domenskih testova, 87 UI provjera na 320/390/1366 px i 16 UI/API provjera sa simuliranim Supabaseom. Fizička provjera na Samsungu i produkcijska objava nisu izvedene.
 
 ## Lokalno pripremljene dorade nakon audita — 18. 11. 2026.
 
