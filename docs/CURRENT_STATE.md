@@ -8,6 +8,8 @@ Zadaci s rokom automatski dobivaju pojedinačne podsjetnike u 9:00 po Zagrebu tr
 
 Lokalna provjera u PGliteu obuhvaća svih devet migracija i sedam SQL provjera. Novi slučaj pokriva sva tri termina, zimsko i ljetno vrijeme, preklop s ručnim podsjetnikom, promjenu i uklanjanje roka te dovršavanje. Integracijski pregled na mobitelu i desktopu pokriva jednokratno uključivanje, spremanje samo s rokom i prijašnji ručni tijek.
 
+Prolaze lint, TypeScript/build, Deno provjera, 29 Vitest testova, 17 izoliranih integracijskih provjera i svih 87 UI provjera na ponovljenom prolazu. Migracija i ažurirana Edge funkcija su na produkciji. Supabase Cron uspješno je pozvao novu funkciju nakon migracije u 15:24 po Zagrebu. Objavljen je Cloudflare Pages deployment `26aa9b7a` iz commita `29eeac3`. Svih devet HTTPS datoteka odgovara lokalnom buildu, a anonimni pristup je odbijen. Stvarni primitak obavijesti na fizičkom Samsungu nije provjeren.
+
 ## Push podsjetnik za zadatak — 20. 11. 2026.
 
 Objavljen je pojedinačni push s nazivom zadatka i ručno odabranim vremenom u zoni Europe/Zagreb. Vlasnik uključuje push na uređaju na kojem želi primati podsjetnike. Na dodir obavijesti otvara se zadatak. Uređivanje može promijeniti ili ukloniti termin, a dovršavanje ga otkazuje.
