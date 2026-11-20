@@ -4,15 +4,17 @@ Ažurirano: 20. 11. 2026.
 
 ## Push podsjetnik za zadatak — 20. 11. 2026.
 
-Pripremljen je pojedinačni push s nazivom zadatka i ručno odabranim vremenom u zoni Europe/Zagreb. Vlasnik uključuje push na uređaju na kojem želi primati podsjetnike. Na dodir obavijesti otvara se zadatak. Uređivanje može promijeniti ili ukloniti termin, a dovršavanje ga otkazuje.
+Objavljen je pojedinačni push s nazivom zadatka i ručno odabranim vremenom u zoni Europe/Zagreb. Vlasnik uključuje push na uređaju na kojem želi primati podsjetnike. Na dodir obavijesti otvara se zadatak. Uređivanje može promijeniti ili ukloniti termin, a dovršavanje ga otkazuje.
 
-Prolaze lint, TypeScript, build, Deno provjera Edge funkcije, 29 Vitest testova, 87 UI provjera, 17 provjera sa simuliranim Supabaseom i svih osam migracija sa šest SQL provjera u PGliteu. Za stvarnu isporuku treba konfigurirati produkcijski Supabase i na Samsungu uključiti obavijesti za Trenio.
+Prolaze lint, TypeScript, build, Deno provjera Edge funkcije, 29 Vitest testova, 87 UI provjera, 17 provjera sa simuliranim Supabaseom i svih osam migracija sa šest SQL provjera u PGliteu. Na produkcijskom projektu primijenjena je migracija `202611200001_task_push.sql`, objavljena Edge funkcija i aktiviran Cron svake minute. Potvrđeni su uspješan poziv funkcije iz Crona (HTTP 200), odbijanje neovlaštenog poziva (HTTP 401) i ograničenja novog RPC pristupa. Stvarni primitak obavijesti na fizičkom Samsungu ostaje za provjeru nakon uključivanja obavijesti na uređaju.
+
+Cloudflare Pages deployment `56044aa4` objavljen je na https://trenio.pages.dev/ iz commita `1c394f9`. HTTPS provjera potvrđuje jednakost svih devet datoteka s lokalnim buildom, uključujući service worker. Anoniman pristup postojećim tablicama i javna registracija i dalje su odbijeni.
 
 ## Poveznice i redoslijed zadataka — 20. 11. 2026.
 
 Zajednički editor bilješki, planova i ideja prikazuje plave, podcrtane poveznice. Klik ili dodir izvan aktivnog uređivanja otvara adresu, dok klik u aktivnom editoru postavlja pokazivač za uređivanje. Aktivni zadaci u Danas, Trenutno, kategorijama i pretrazi sortirani su od najranijeg roka, a zadaci bez roka idu na kraj. Redoslijed se preračunava nakon spremanja i dohvata podataka. Prikaz dovršenih zadataka u arhivi ostaje isti.
 
-Lokalno prolazi 26 domenskih testova, 87 UI provjera na 320/390/1366 px i 16 UI/API provjera sa simuliranim Supabaseom. Fizička provjera na Samsungu i produkcijska objava nisu izvedene.
+Lokalno prolazi 26 domenskih testova, 87 UI provjera na 320/390/1366 px i 16 UI/API provjera sa simuliranim Supabaseom. Promjene su uključene u produkcijsku objavu s push podsjetnicima. Fizička provjera na Samsungu nije izvedena.
 
 ## Lokalno pripremljene dorade nakon audita — 18. 11. 2026.
 
