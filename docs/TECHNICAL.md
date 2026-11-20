@@ -1,5 +1,11 @@
 # Trenio — tehnički prijedlog
 
+## Push podsjetnici za zadatke — 20. 11. 2026.
+
+`tasks.remind_at` je opcionalni UTC termin, prikazan i upisan kao lokalno vrijeme Zagreba. Okidač otkazuje podsjetnik pri dovršavanju, uključujući dovršavanje povezanog checkboxa. Raspored dijeli postojeće spremanje i provjeru verzije zadatka. Privatne tablice čuvaju jednu aktivnu pretplatu vlasnika i stanje isporuke po zadatku. Registracija je ograničena na provjerene domene web push usluga. Vlasnik preko RPC-a može registrirati, provjeriti ili odjaviti pojedinu pretplatu. RPC-ovi za isporuku dostupni su samo ulozi `service_role`.
+
+Supabase Cron svake minute preko `pg_net` poziva Edge Function uz tajnu iz Vaulta. Funkcija preuzima do 20 dospjelih podsjetnika uz zaključavanje redaka i dvominutni rok za potvrdu pokušaja. Prolazna greška može se ponoviti do četiri pokušaja unutar sata od termina. Istekla pretplata uklanja se samo ako odgovara endpointu pokušaja. Service worker prikazuje primljeni naziv zadatka, koristi istu oznaku za ponovljenu isporuku istog termina i na dodir otvara zadatak. Ne predmemorira privatne podatke. Postupak objave je u README-u.
+
 Status: React + TypeScript + Vite + Supabase odobreni 25. 10. 2026. Frontend je povezan s projektom `trenio`; stvarna vlasnička prijava, spremanje i sukob verzija provjereni su. SQL i javni API provjere prolaze. Izvoz i oporavak u privremenim tablicama provjereni su; hosting je postavljen na https://trenio.pages.dev/, a korisnik je 28. 10. potvrdio četiri kruga na fizičkim uređajima. Početna verzija radi uz internet.
 
 ## Opcije

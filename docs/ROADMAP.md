@@ -89,7 +89,7 @@ Unutar dogovorenog funkcionalnog opsega nema preostale planirane razvojne faze. 
 
 Popis mogućnosti za budući dogovor, a ne odobrenje implementacije ili raspored razvoja. Korisnik je izričito izdvojio podsjetnike; ostale stavke su prijedlozi. Prioriteti se određuju prema svakodnevnom korištenju.
 
-1. **Podsjetnici za zadatke** — opcionalni datum i vrijeme obavijesti, uz mogućnost odgode i isključivanja. Prije razvoja dogovoriti kanale obavijesti, ponašanje zatvorene PWA aplikacije na Samsungu i vremensku zonu podsjetnika; postojeće pravilo Danas ostaje Europe/Zagreb.
+1. **Podsjetnici za zadatke** — odobren pojedinačni push na mobitel s nazivom zadatka i ručno odabranim vremenom. Zasebna odgoda iz obavijesti, centar obavijesti i automatske najave rokova ostaju za moguću nadogradnju.
 2. **Ponavljajući zadaci** — dnevno, tjedno ili odabranim danima. Dogovoriti nastanak sljedećeg zadatka, propuštena ponavljanja i očuvanje povijesti dovršenih primjeraka.
 3. **Automatske sigurnosne kopije** — validirani izvoz na privatni OneDrive, zadržavanje verzija i vidljiva obavijest ako kopiranje ne uspije. Dogovoriti sigurno izvršavanje i pristup bez administratorskih tajni u frontendu.
 4. **Podsjetnik za ručni backup i probni oporavak** — dok kopiranje ostaje ručno, opcionalno podsjećanje na tjedni izvoz i tromjesečnu provjeru oporavka. Podsjetnik sam ne izrađuje kopiju.

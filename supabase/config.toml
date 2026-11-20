@@ -1,0 +1,4 @@
+project_id = "trenio"
+
+[functions.dispatch-task-push]
+verify_jwt = false

@@ -7,6 +7,7 @@ export type Task = {
   categoryId: string | null
   plannedDate: string | null
   dueDate: string | null
+  remindAt?: string | null
   completedAt: string | null
   pinned: boolean
   version: number

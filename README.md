@@ -6,6 +6,7 @@ Trenio is a mobile-first personal organizer for tasks, notes, ideas, and plans, 
 
 - Organize items by category and keep pinned items in the Current view.
 - Review scheduled and overdue tasks in Today, which uses the Europe/Zagreb time zone.
+- Schedule individual mobile push reminders that display the task name and open the task on tap.
 - Turn lines into plan steps, create linked tasks from saved checkboxes, and keep completion in sync.
 - Convert ideas into plans while preserving their content.
 - Search names, content, and categories without case or accent sensitivity. Enable archive search to include completed or archived items.
@@ -31,6 +32,12 @@ Open the URL printed by Vite, usually http://127.0.0.1:5173.
 3. Copy `.env.example` to `.env` and set the project URL and public publishable key. Keep administrator, secret, and service-role keys out of the frontend.
 4. Restart Vite. Verify that the owner can save and reopen entries and that anonymous and secondary accounts cannot read the owner's data.
 
+### Enable push reminders
+
+Apply the task push migration and deploy the `dispatch-task-push` Edge Function with `supabase/config.toml`. Set `TASK_PUSH_PUBLIC_KEY`, `TASK_PUSH_PRIVATE_KEY`, and `TASK_PUSH_CRON_SECRET` as Edge Function secrets. Reuse the VAPID key pair on subsequent deployments to preserve subscriptions. Store the function's full HTTPS URL as `trenio_push_function_url` and the same scheduling secret as `trenio_push_cron_secret` in Vault. Apply `supabase/setup/schedule_task_push.sql`. Set only the public VAPID key as `VITE_TASK_PUSH_PUBLIC_KEY` for the frontend build.
+
+On the phone, open an active task, select **Uključi push na ovom uređaju**, and grant permission. Save a date and time under **Push podsjetnik** in the Europe/Zagreb time zone. The most recently enabled device receives the reminders. Verify delivery with Trenio closed and tap the notification to confirm that it opens the task.
+
 ## Checks and build
 
 ```powershell
@@ -49,6 +56,8 @@ The demo and connected Playwright checks use isolated local servers. The public-
 ## Backups
 
 Use the app menu to export a fresh JSON backup, including archived items. Keep backups private. Use `npm run backup:prepare -- 'C:/path/trenio-backup.json'` to validate the export and generate a SQL rehearsal for temporary tables. The `--restore-empty` option generates a separate script for an empty, configured database. Confirm the target project and owner before running it. The restore script stops if it finds existing data. Generated SQL is stored in the ignored `.local/` directory. The backup size limit is 10 MB.
+
+Push subscriptions, reminder schedules, and delivery records are excluded. Set any needed reminders again after restoring a backup.
 
 ## Documentation
 

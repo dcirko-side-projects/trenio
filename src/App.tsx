@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Archive, ArrowLeft, ArrowUpRight, CalendarDays, Check, Download, FileText, Folder, LayoutList, Lightbulb, ListTodo, LogOut, MoreHorizontal, Pin, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react'
 import type { Session } from '@supabase/supabase-js'
@@ -11,10 +11,12 @@ import { CategoryIcon, iconLabels } from './CategoryIcon'
 import { categoryColors, categoryDisplayColor, categoryIcons, categoryPath, orderedCategories, promoteChildren, siblings, validateCategory } from './categories'
 import { createBackup } from './backup'
 import { changeNode, checklistItems, contentText, matchesSearch, syncDemo, unlinkTask } from './content'
+import { PushDevice, taskPushPublicKey } from './PushDevice'
+import { reminderInput, reminderInstant, validTaskId } from './reminders'
 
 const NoteEditor = lazy(() => import('./NoteEditor').then(module => ({ default: module.NoteEditor })))
 
-type Draft = { kind: 'task'; item: Task } | { kind: 'note'; item: Note }
+type Draft = { kind: 'task'; item: Task; reminderInput?: string } | { kind: 'note'; item: Note }
 const empty: Data = { categories: [], tasks: [], notes: [] }
 
 export function App() {
@@ -27,6 +29,7 @@ export function App() {
   const [tab, setTab] = useState<'today' | 'pinned'>('today')
   const [categoryId, setCategoryId] = useState<string | null | undefined>()
   const [draft, setDraft] = useState<Draft | null>(null)
+  const [taskFromPush, setTaskFromPush] = useState(() => new URLSearchParams(window.location.hash.slice(1)).get('task'))
   const [dirty, setDirty] = useState(false)
   const [busy, setBusy] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -92,6 +95,35 @@ export function App() {
     } catch (err) { if (current === request.current) setReadError(message(err)) }
     finally { if (current === request.current) setLoading(false) }
   }, [session])
+
+  const openTaskFromPush = useEffectEvent((id: string) => {
+    setTaskFromPush(null)
+    if (window.location.hash === `#task=${id}`) {
+      window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search)
+    }
+    if (draft?.item.id === id) return
+    const task = data.tasks.find(row => row.id === id)
+    if (!task) { setNotice('Zadatak iz podsjetnika više nije dostupan.'); return }
+    if (unsaved && !window.confirm('Odbaciti nespremljene promjene i otvoriti zadatak iz podsjetnika?')) return
+    setCategoryForm(false)
+    setNotice('')
+    openDraft({ kind: 'task', item: task })
+  })
+  useEffect(() => {
+    if (!taskPushPublicKey || !session || data === empty || busy || !validTaskId(taskFromPush)) return
+    const timer = window.setTimeout(() => openTaskFromPush(taskFromPush), 0)
+    return () => clearTimeout(timer)
+  }, [session, data, busy, taskFromPush])
+  useEffect(() => {
+    if (!taskPushPublicKey || !session || !('serviceWorker' in navigator)) return
+    const handle = (event: MessageEvent) => {
+      if (event.data?.type !== 'trenio-task-reminder' || !validTaskId(event.data.taskId)) return
+      if (pending.current) setTaskFromPush(event.data.taskId)
+      else void refresh().finally(() => setTaskFromPush(event.data.taskId))
+    }
+    navigator.serviceWorker.addEventListener('message', handle)
+    return () => navigator.serviceWorker.removeEventListener('message', handle)
+  }, [session, refresh])
 
   useEffect(() => {
     if (!supabase) return
@@ -196,7 +228,17 @@ export function App() {
   async function submitDraft(event: FormEvent) {
     event.preventDefault()
     if (!draft || !draft.item.title.trim()) return
-    const saved = await run(() => persist(draft.kind, { ...draft.item, title: draft.item.title.trim() }))
+    const saved = await run(() => {
+      if (draft.kind === 'task' && draft.reminderInput !== undefined) {
+        const remindAt = draft.reminderInput === reminderInput(draft.item.remindAt)
+          ? draft.item.remindAt : reminderInstant(draft.reminderInput)
+        if (remindAt && remindAt !== draft.item.remindAt && Date.parse(remindAt) <= Date.now()) {
+          throw new Error('Vrijeme podsjetnika mora biti u budućnosti.')
+        }
+        return persist('task', { ...draft.item, title: draft.item.title.trim(), remindAt })
+      }
+      return persist(draft.kind, { ...draft.item, title: draft.item.title.trim() })
+    })
     if (saved) {
       finishDraft()
       const destination = draft.kind === 'note' && !draft.item.archivedAt && view === 'overview' && (tab === 'today' || !draft.item.pinned)
@@ -391,6 +433,7 @@ export function App() {
             const copy = structuredClone(draft.item)
             copy.id = crypto.randomUUID()
             copy.version = 0
+            if ('remindAt' in copy) copy.remindAt = null
             if ('body' in copy) for (const { node } of checklistItems(copy.body)) {
               if (node.attrs) delete node.attrs.taskId
             }
@@ -403,6 +446,22 @@ export function App() {
           <input id="item-title" className="title-input" required maxLength={300} placeholder={draft.kind === 'task' ? 'Što želiš napraviti?' : draft.item.kind === 'plan' ? 'Što želiš ostvariti?' : draft.item.kind === 'idea' ? 'Koja ti je ideja?' : 'Naslov bilješke'} value={draft.item.title} onChange={event => patchDraft({ title: event.target.value })} />
           <label className="field-label" htmlFor="item-category">Kategorija</label><select id="item-category" value={draft.item.categoryId ?? ''} onChange={event => patchDraft({ categoryId: event.target.value || null })}><option value="">Bez kategorije</option>{orderedCategories(data.categories).map(category => <option key={category.id} value={category.id}>{categoryPath(data.categories, category.id)}</option>)}</select>
           {draft.kind === 'task' ? <div className="date-fields"><label>Planirano za<input type="date" value={draft.item.plannedDate ?? ''} onChange={event => patchDraft({ plannedDate: event.target.value || null })} /></label><label>Krajnji rok<input type="date" value={draft.item.dueDate ?? ''} onChange={event => patchDraft({ dueDate: event.target.value || null })} /></label></div> : <>{draft.item.kind === 'plan' && <><p className="quiet">Opiši plan. Ako želiš pratiti napredak, pretvori retke u korake pomoću ikone checkliste.</p><PlanProgress body={draft.item.body} /></>}<Suspense fallback={<p role="status">Otvaranje editora…</p>}><NoteEditor key={`${draft.item.id}:${draft.item.version}`} body={draft.item.body} disabled={busy} kind={draft.item.kind} onChange={body => patchDraft({ body })} /></Suspense>{checklistItems(draft.item.body).length > 0 && <section className="step-links" aria-label="Zadaci iz checkboxa"><p className="quiet">Checkbox može postati povezani zadatak. Promjena stanja checkboxa primjenjuje se spremanjem. Naslov zadatka uređuje se zasebno.</p>{draft.item.version === 0 && <p className="quiet">Prvo spremi sadržaj da možeš povezati zadatke.</p>}{checklistItems(draft.item.body).map(({ node, path }, index) => <div className="step-link" key={path.join('.')}><span>{contentText(node) || `Checkbox ${index + 1}`}</span>{node.attrs?.taskId ? <button type="button" className="text-button" disabled={busy} onClick={() => openLinkedTask(String(node.attrs?.taskId))}>Otvori povezani zadatak</button> : <button type="button" className="text-button" disabled={busy || draft.item.version === 0 || !contentText(node).trim() || !draft.item.title.trim()} onClick={() => void linkStep(path)}>Stvori povezani zadatak</button>}</div>)}</section>}</>}
+          {draft.kind === 'task' && !draft.item.completedAt && !demo && taskPushPublicKey && <div className="task-reminder">
+            <label className="field-label" htmlFor="remind-at">Push podsjetnik</label>
+            <div className="reminder-input">
+              <input id="remind-at" type="datetime-local" aria-describedby="reminder-timezone" value={draft.reminderInput ?? reminderInput(draft.item.remindAt)} onChange={event => {
+                const value = event.target.value
+                setDirty(true)
+                setDraft(current => current?.kind === 'task' ? { ...current, reminderInput: value } : current)
+              }} />
+              {(draft.reminderInput ?? draft.item.remindAt) && <button type="button" className="text-button" onClick={() => {
+                setDirty(true)
+                setDraft(current => current?.kind === 'task' ? { ...current, reminderInput: '' } : current)
+              }}>Ukloni podsjetnik</button>}
+            </div>
+            <p className="quiet" id="reminder-timezone">Datum i vrijeme u zoni Europe/Zagreb.</p>
+            <PushDevice />
+          </div>}
           {draft.kind === 'task' && sourceNote && <button type="button" className="text-button" onClick={() => { if (dirty) setError('Prvo spremi promjene zadatka, zatim otvori izvor.'); else openDraft({ kind: 'note', item: sourceNote }) }}>Otvori izvor: {sourceNote.title}</button>}
           <label className="check-field"><input type="checkbox" checked={draft.item.pinned} onChange={event => patchDraft({ pinned: event.target.checked })} />Prikvači u Trenutno</label>
         </fieldset>

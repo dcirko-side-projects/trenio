@@ -14,6 +14,6 @@ export default defineConfig({
     command: 'npm run dev -- --port 4186 --strictPort',
     url: 'http://127.0.0.1:4186',
     reuseExistingServer: false,
-    env: { VITE_SUPABASE_URL: 'http://127.0.0.1:54329', VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_trenio_test' },
+    env: { VITE_SUPABASE_URL: 'http://127.0.0.1:54329', VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_trenio_test', VITE_TASK_PUSH_PUBLIC_KEY: 'test-key' },
   },
 })

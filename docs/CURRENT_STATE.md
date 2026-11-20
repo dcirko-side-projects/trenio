@@ -2,6 +2,12 @@
 
 Ažurirano: 20. 11. 2026.
 
+## Push podsjetnik za zadatak — 20. 11. 2026.
+
+Pripremljen je pojedinačni push s nazivom zadatka i ručno odabranim vremenom u zoni Europe/Zagreb. Vlasnik uključuje push na uređaju na kojem želi primati podsjetnike. Na dodir obavijesti otvara se zadatak. Uređivanje može promijeniti ili ukloniti termin, a dovršavanje ga otkazuje.
+
+Prolaze lint, TypeScript, build, Deno provjera Edge funkcije, 29 Vitest testova, 87 UI provjera, 17 provjera sa simuliranim Supabaseom i svih osam migracija sa šest SQL provjera u PGliteu. Za stvarnu isporuku treba konfigurirati produkcijski Supabase i na Samsungu uključiti obavijesti za Trenio.
+
 ## Poveznice i redoslijed zadataka — 20. 11. 2026.
 
 Zajednički editor bilješki, planova i ideja prikazuje plave, podcrtane poveznice. Klik ili dodir izvan aktivnog uređivanja otvara adresu, dok klik u aktivnom editoru postavlja pokazivač za uređivanje. Aktivni zadaci u Danas, Trenutno, kategorijama i pretrazi sortirani su od najranijeg roka, a zadaci bez roka idu na kraj. Redoslijed se preračunava nakon spremanja i dohvata podataka. Prikaz dovršenih zadataka u arhivi ostaje isti.

@@ -4,12 +4,12 @@ import { readFile } from 'node:fs/promises'
 import { changeNode, checklistItems, contentText } from '../src/content'
 import type { Note } from '../src/domain'
 
-type Row = { id: string; title: string; owner_id: string; planned_date: string | null; due_date: string | null; category_id: string | null; completed_at: string | null; pinned: boolean; version: number }
+type Row = { id: string; title: string; owner_id: string; planned_date: string | null; due_date: string | null; remind_at?: string | null; category_id: string | null; completed_at: string | null; pinned: boolean; version: number }
 type NoteRow = { id: string; title: string; owner_id: string; category_id: string | null; body: unknown; archived_at: string | null; pinned: boolean; version: number }
 
 // Synthetic identities and responses, intercepted locally. No real Supabase requests.
 async function setupBackend(page: Page) {
-  const state = { tasks: [] as Row[], notes: [] as NoteRow[], categories: [] as { id: string; name: string; parent_id?: string | null; icon?: string; color?: string; sort_order?: number; version?: number }[], rejectWrite: false, failReadAfterWrite: false, readFailure: false, writeGate: null as Promise<void> | null }
+  const state = { tasks: [] as Row[], notes: [] as NoteRow[], categories: [] as { id: string; name: string; parent_id?: string | null; icon?: string; color?: string; sort_order?: number; version?: number }[], rejectWrite: false, failReadAfterWrite: false, readFailure: false, writeGate: null as Promise<void> | null, pushEndpoint: null as string | null }
   const user = { id: '10000000-0000-4000-8000-000000000001', aud: 'authenticated', role: 'authenticated', email: 'owner@example.invalid', app_metadata: {}, user_metadata: {}, created_at: '2026-01-01T00:00:00Z' }
   const expiry = Math.floor(Date.now() / 1000) + 3600
   const token = [
@@ -26,6 +26,12 @@ async function setupBackend(page: Page) {
     if (url.pathname === '/auth/v1/token') return reply({ access_token: token, refresh_token: 'synthetic-refresh', token_type: 'bearer', expires_in: 3600, expires_at: expiry, user })
     if (url.pathname === '/auth/v1/user') return reply(user)
     if (url.pathname === '/rest/v1/rpc/is_app_owner') return reply(true)
+    if (url.pathname === '/rest/v1/rpc/task_push_device') {
+      const { endpoint, device, disable } = request.postDataJSON()
+      if (disable && state.pushEndpoint === endpoint) state.pushEndpoint = null
+      else if (device) state.pushEndpoint = endpoint
+      return reply(state.pushEndpoint === endpoint)
+    }
     if (url.pathname === '/rest/v1/rpc/save_category') {
       if (state.writeGate) await state.writeGate
       if (state.rejectWrite) return reply({ code: '503' }, 503)
@@ -107,6 +113,57 @@ async function setupBackend(page: Page) {
   await expect(page.getByText('Učitavanje podataka…')).toHaveCount(0)
   return state
 }
+
+test('push se uključuje izričito, a podsjetnik se sprema, mijenja i uklanja na zadatku', async ({ page }) => {
+  const endpoint = 'https://fcm.googleapis.com/fcm/send/synthetic-subscription'
+  await page.addInitScript(endpoint => {
+    let device: { endpoint: string; toJSON: () => unknown; unsubscribe: () => Promise<boolean> } | null = null
+    Object.defineProperty(Notification, 'permission', { get: () => 'granted' })
+    PushManager.prototype.getSubscription = async () => device as PushSubscription | null
+    PushManager.prototype.subscribe = async () => {
+      device = { endpoint, toJSON: () => ({ endpoint }), unsubscribe: async () => { device = null; return true } }
+      return device as unknown as PushSubscription
+    }
+  }, endpoint)
+  const state = await setupBackend(page)
+  await page.getByRole('button', { name: 'Dodaj zadatak', exact: true }).click()
+  await page.getByLabel('Naziv zadatka').fill('Pripremi dokumente')
+  const remindAt = page.getByLabel('Push podsjetnik')
+  const save = page.getByRole('button', { name: 'Spremi', exact: true })
+  const enable = page.getByRole('button', { name: 'Uključi push na ovom uređaju' })
+  await expect(enable).toBeEnabled()
+  expect(state.pushEndpoint).toBeNull()
+  await enable.click()
+  await expect(page.getByText('Push je uključen na ovom uređaju.', { exact: false })).toBeVisible()
+  expect(state.pushEndpoint).toBe(endpoint)
+  await page.getByRole('button', { name: 'Isključi push na ovom uređaju' }).click()
+  await expect(enable).toBeEnabled()
+  expect(state.pushEndpoint).toBeNull()
+  await enable.click()
+  await expect(page.getByRole('button', { name: 'Isključi push na ovom uređaju' })).toBeEnabled()
+  await remindAt.fill('2020-01-10T09:30')
+  await save.click()
+  await expect(page.getByRole('alert')).toContainText('mora biti u budućnosti')
+  await remindAt.fill('2099-01-10T09:30')
+  await save.click()
+  await expect.poll(() => state.tasks[0]?.remind_at).toBe('2099-01-10T08:30:00.000Z')
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await page.goto('about:blank')
+  await page.goto(`/#task=${state.tasks[0].id}`)
+  await expect(page.getByLabel('Naziv zadatka')).toHaveValue('Pripremi dokumente')
+  await expect(remindAt).toHaveValue('2099-01-10T09:30')
+  await expect(page).toHaveURL('http://127.0.0.1:4186/')
+  await page.screenshot({ path: '.local/ui-review/task-reminder-mobile.png' })
+  await remindAt.fill('2099-01-10T10:00')
+  await save.click()
+  await expect.poll(() => state.tasks[0].remind_at).toBe('2099-01-10T09:00:00.000Z')
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await page.evaluate(taskId => navigator.serviceWorker.dispatchEvent(new MessageEvent('message', { data: { type: 'trenio-task-reminder', taskId } })), state.tasks[0].id)
+  await expect(remindAt).toHaveValue('2099-01-10T10:00')
+  await page.getByRole('button', { name: 'Ukloni podsjetnik' }).click()
+  await save.click()
+  await expect.poll(() => state.tasks[0].remind_at).toBeNull()
+})
 
 test('spremljeni zadatak se ponovno učita, a zastarjela izmjena čuva unos', async ({ page }) => {
   const state = await setupBackend(page)

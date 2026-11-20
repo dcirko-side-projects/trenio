@@ -9,7 +9,7 @@ export const configurationIncomplete = Boolean(url) !== Boolean(key)
 
 export class VersionConflict extends Error {}
 
-type TaskRow = { id: string; title: string; category_id: string | null; planned_date: string | null; due_date: string | null; completed_at: string | null; pinned: boolean; version: number }
+type TaskRow = { id: string; title: string; category_id: string | null; planned_date: string | null; due_date: string | null; remind_at?: string | null; completed_at: string | null; pinned: boolean; version: number }
 type NoteRow = { kind: 'note' | 'plan' | 'idea'; id: string; title: string; category_id: string | null; body: JSONContent; archived_at: string | null; pinned: boolean; version: number }
 
 async function loadRows<T>(table: 'categories' | 'tasks' | 'notes'): Promise<T[]> {
@@ -35,7 +35,7 @@ export async function loadData(): Promise<Data> {
   return {
     categories: categories.map(row => ({ id: row.id, name: row.name, parentId: row.parent_id ?? null, icon: row.icon ?? 'folder', color: row.color ?? '#B4D6D3', sortOrder: row.sort_order ?? 0, version: row.version ?? 1 })),
     tasks: tasks.map(row => ({ id: row.id, title: row.title, categoryId: row.category_id,
-      plannedDate: row.planned_date, dueDate: row.due_date, completedAt: row.completed_at, pinned: row.pinned, version: row.version })),
+      plannedDate: row.planned_date, dueDate: row.due_date, remindAt: row.remind_at, completedAt: row.completed_at, pinned: row.pinned, version: row.version })),
     notes: notes.map(row => ({ kind: row.kind ?? 'note', id: row.id, title: row.title, categoryId: row.category_id,
       body: row.body, archivedAt: row.archived_at, pinned: row.pinned, version: row.version })),
   }
@@ -45,7 +45,7 @@ export async function saveRecord(kind: 'task' | 'note', item: Task | Note, owner
   if (!supabase) return
   const common = { title: item.title.trim(), category_id: item.categoryId, pinned: item.pinned }
   const payload = kind === 'task'
-    ? { ...common, planned_date: (item as Task).plannedDate, due_date: (item as Task).dueDate, completed_at: (item as Task).completedAt }
+    ? { ...common, planned_date: (item as Task).plannedDate, due_date: (item as Task).dueDate, completed_at: (item as Task).completedAt, remind_at: (item as Task).remindAt }
     : { ...common, kind: (item as Note).kind, body: (item as Note).body, archived_at: (item as Note).archivedAt }
   const table = kind === 'task' ? 'tasks' : 'notes'
   const result = existing
@@ -81,4 +81,10 @@ export async function removeCategory(id: string) {
   if (!supabase) return
   const { error } = await supabase.rpc('delete_category', { target_id: id })
   if (error) throw new Error('Kategorija nije izbrisana. Sadržaj je sačuvan; pokušaj ponovno.')
+}
+
+export async function updatePushDevice(endpoint: string, device?: PushSubscriptionJSON, disable = false): Promise<boolean> {
+  const { data, error } = await supabase!.rpc('task_push_device', { endpoint, device, disable })
+  if (error) throw new Error('Postavku push obavijesti nije moguće spremiti.')
+  return data === true
 }
