@@ -30,6 +30,15 @@ describe('push podsjetnik', () => {
     events.push({ waitUntil, data: { json: () => ({ taskId, title: 'Kupi kruh', remindAt: '2026-11-25T08:30:00Z' }) } })
     await completion
     expect(showNotification).toHaveBeenCalledWith('Kupi kruh', expect.objectContaining({ data: { taskId } }))
+    for (const [kind, body] of [
+      ['before_due', 'Trenio · Rok je za tri dana'],
+      ['due_today', 'Trenio · Rok je danas'],
+      ['overdue', 'Trenio · Rok je istekao'],
+    ]) {
+      events.push({ waitUntil, data: { json: () => ({ taskId, title: 'Kupi kruh', kind }) } })
+      await completion
+      expect(showNotification).toHaveBeenLastCalledWith('Kupi kruh', expect.objectContaining({ body }))
+    }
     const close = vi.fn()
     events.notificationclick({ waitUntil, notification: { data: { taskId }, close } })
     await completion

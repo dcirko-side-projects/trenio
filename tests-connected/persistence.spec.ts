@@ -114,7 +114,7 @@ async function setupBackend(page: Page) {
   return state
 }
 
-test('push se uključuje izričito, a podsjetnik se sprema, mijenja i uklanja na zadatku', async ({ page }) => {
+test('push se uključuje jednom u postavkama, a zadatak se sprema samo s rokom', async ({ page }) => {
   const endpoint = 'https://fcm.googleapis.com/fcm/send/synthetic-subscription'
   await page.addInitScript(endpoint => {
     let device: { endpoint: string; toJSON: () => unknown; unsubscribe: () => Promise<boolean> } | null = null
@@ -126,10 +126,12 @@ test('push se uključuje izričito, a podsjetnik se sprema, mijenja i uklanja na
     }
   }, endpoint)
   const state = await setupBackend(page)
-  await page.getByRole('button', { name: 'Dodaj zadatak', exact: true }).click()
-  await page.getByLabel('Naziv zadatka').fill('Pripremi dokumente')
-  const remindAt = page.getByLabel('Push podsjetnik')
-  const save = page.getByRole('button', { name: 'Spremi', exact: true })
+  const menu = page.getByLabel('Više mogućnosti')
+  await menu.click()
+  await page.getByRole('button', { name: 'Push obavijesti', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Push obavijesti' })).toBeFocused()
+  await expect(page.getByText(/prvi dan nakon isteka/)).toBeVisible()
+  await page.screenshot({ path: `.local/ui-review/push-settings-${page.viewportSize()?.width}.png` })
   const enable = page.getByRole('button', { name: 'Uključi push na ovom uređaju' })
   await expect(enable).toBeEnabled()
   expect(state.pushEndpoint).toBeNull()
@@ -141,6 +143,21 @@ test('push se uključuje izričito, a podsjetnik se sprema, mijenja i uklanja na
   expect(state.pushEndpoint).toBeNull()
   await enable.click()
   await expect(page.getByRole('button', { name: 'Isključi push na ovom uređaju' })).toBeEnabled()
+  await page.keyboard.press('Escape')
+  await expect(menu).toBeFocused()
+  await page.getByRole('button', { name: 'Dodaj zadatak', exact: true }).click()
+  await page.getByLabel('Naziv zadatka').fill('Pripremi dokumente')
+  await page.getByLabel('Krajnji rok').fill('2099-01-10')
+  await expect(enable).toHaveCount(0)
+  const save = page.getByRole('button', { name: 'Spremi', exact: true })
+  await save.click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  expect(state.tasks[0].due_date).toBe('2099-01-10')
+  expect(state.tasks[0].remind_at).toBeUndefined()
+  expect(state.pushEndpoint).toBe(endpoint)
+  await page.getByRole('button', { name: /^Pripremi dokumente/ }).click()
+  await page.getByText('Dodatni podsjetnik', { exact: true }).click()
+  const remindAt = page.getByLabel('Datum i vrijeme podsjetnika')
   await remindAt.fill('2020-01-10T09:30')
   await save.click()
   await expect(page.getByRole('alert')).toContainText('mora biti u budućnosti')

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Archive, ArrowLeft, ArrowUpRight, CalendarDays, Check, Download, FileText, Folder, LayoutList, Lightbulb, ListTodo, LogOut, MoreHorizontal, Pin, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react'
+import { Archive, ArrowLeft, ArrowUpRight, Bell, CalendarDays, Check, Download, FileText, Folder, LayoutList, Lightbulb, ListTodo, LogOut, MoreHorizontal, Pin, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react'
 import type { Session } from '@supabase/supabase-js'
 import { VersionConflict, configurationIncomplete, createLinkedTask, deleteRecord, loadData, removeCategory, saveCategory, saveRecord, supabase } from './data'
 import { compareTaskDueDates, compareTodayTasks, createDemo, formatDay, isTodayTask, planProgress, taskGroup, todayInZagreb } from './domain'
@@ -30,6 +30,7 @@ export function App() {
   const [categoryId, setCategoryId] = useState<string | null | undefined>()
   const [draft, setDraft] = useState<Draft | null>(null)
   const [taskFromPush, setTaskFromPush] = useState(() => new URLSearchParams(window.location.hash.slice(1)).get('task'))
+  const [pushSettingsOpen, setPushSettingsOpen] = useState(false)
   const [dirty, setDirty] = useState(false)
   const [busy, setBusy] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -55,6 +56,9 @@ export function App() {
   const pageTitle = useRef<HTMLHeadingElement>(null)
   const dialog = useRef<HTMLDialogElement>(null)
   const categoryDialog = useRef<HTMLDialogElement>(null)
+  const pushSettingsDialog = useRef<HTMLDialogElement>(null)
+  const pushSettingsHeading = useRef<HTMLHeadingElement>(null)
+  const pageMenuTrigger = useRef<HTMLElement>(null)
   const savedDestinationAction = useRef<HTMLButtonElement>(null)
   const pending = useRef(false)
   const request = useRef(0)
@@ -105,6 +109,7 @@ export function App() {
     const task = data.tasks.find(row => row.id === id)
     if (!task) { setNotice('Zadatak iz podsjetnika više nije dostupan.'); return }
     if (unsaved && !window.confirm('Odbaciti nespremljene promjene i otvoriti zadatak iz podsjetnika?')) return
+    pushSettingsDialog.current?.close()
     setCategoryForm(false)
     setNotice('')
     openDraft({ kind: 'task', item: task })
@@ -135,7 +140,7 @@ export function App() {
     })
     const { data: listener } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next); setAuthReady(true)
-      if (!next) { setReadError(''); setConflictId(null); setComparison(null); request.current++; setData(empty); setDraft(null); setDirty(false); setLoading(false) }
+      if (!next) { setReadError(''); setConflictId(null); setComparison(null); request.current++; setData(empty); setDraft(null); setDirty(false); setLoading(false); setPushSettingsOpen(false) }
     })
     return () => { active = false; listener.subscription.unsubscribe() }
   }, [])
@@ -174,6 +179,11 @@ export function App() {
     }
     else categoryDialog.current?.close()
   }, [categoryForm])
+  useEffect(() => {
+    if (!pushSettingsOpen || !pushSettingsDialog.current) return
+    if (!pushSettingsDialog.current.open) pushSettingsDialog.current.showModal()
+    pushSettingsHeading.current?.focus({ preventScroll: true })
+  }, [pushSettingsOpen])
 
   useEffect(() => {
     // A new screen should start at its heading, including after a long mobile list.
@@ -381,7 +391,19 @@ export function App() {
       <main id="main" className="main-content">
         <div className="page-heading">
           <div><p className="eyebrow">{view === 'overview' ? new Intl.DateTimeFormat('hr', { dateStyle: 'full', timeZone: 'Europe/Zagreb' }).format(new Date()) : 'TVOJ PROSTOR'}</p><h1 ref={pageTitle} tabIndex={-1}>{title}</h1><p className="subtitle">{view === 'overview' ? 'Ono što je važno, na jednom mjestu.' : view === 'archive' ? 'Dovršeno i sačuvano. Vrati kad zatreba.' : 'Organiziraj na svoj način.'}</p></div>
-          <button className="icon-button" aria-label="Otvori pretragu" onClick={() => navigate('search')}><Search size={21} /></button><details className="page-menu" onClick={event => { if (event.target instanceof Element && event.target.closest('button')) event.currentTarget.open = false }}><summary aria-label="Više mogućnosti"><MoreHorizontal size={22} /></summary><div className="popover"><button onClick={() => void exportData()} disabled={busy || loading}><Download size={17} />Izvezi podatke</button><button onClick={() => navigate('archive')}><Archive size={17} />Arhiva</button>{!demo && <><button onClick={() => void refresh()} disabled={busy || loading}><RefreshCw size={17} />Osvježi</button><button onClick={() => void supabase?.auth.signOut().then(({ error }) => { if (error) setError('Odjava nije uspjela.') })}><LogOut size={17} />Odjava</button></>}</div></details>
+          <button className="icon-button" aria-label="Otvori pretragu" onClick={() => navigate('search')}><Search size={21} /></button>
+          <details className="page-menu" onClick={event => { if (event.target instanceof Element && event.target.closest('button')) event.currentTarget.open = false }}>
+            <summary ref={pageMenuTrigger} aria-label="Više mogućnosti"><MoreHorizontal size={22} /></summary>
+            <div className="popover">
+              <button onClick={() => void exportData()} disabled={busy || loading}><Download size={17} />Izvezi podatke</button>
+              <button onClick={() => navigate('archive')}><Archive size={17} />Arhiva</button>
+              {!demo && <>
+                {taskPushPublicKey && <button onClick={() => setPushSettingsOpen(true)}><Bell size={17} />Push obavijesti</button>}
+                <button onClick={() => void refresh()} disabled={busy || loading}><RefreshCw size={17} />Osvježi</button>
+                <button onClick={() => void supabase?.auth.signOut().then(({ error }) => { if (error) setError('Odjava nije uspjela.') })}><LogOut size={17} />Odjava</button>
+              </>}
+            </div>
+          </details>
         </div>
         {readError && !draft && !categoryForm && <div className="error" role="alert">{readError}<button onClick={() => void refresh()}>Osvježi podatke</button></div>}
         {error && !draft && !categoryForm && <div className="error" role="alert">{error}<button onClick={() => void refresh()}>Pokušaj ponovno</button></div>}
@@ -411,6 +433,20 @@ export function App() {
       </main>
     </div>
     <nav className="bottom-nav" aria-label="Mobilna navigacija"><button aria-current={view === 'overview' ? 'page' : undefined} onClick={() => navigate('overview')}><LayoutList size={22} /><span>Pregled</span></button><button className="add-button" aria-label="Brzo dodaj zadatak" onClick={newTask}><Plus size={25} /></button><button aria-current={view === 'categories' ? 'page' : undefined} onClick={() => navigate('categories')}><Folder size={22} /><span>Kategorije</span></button></nav>
+
+    <dialog className="edit-dialog push-settings" aria-labelledby="push-settings-heading" ref={pushSettingsDialog} onClose={() => {
+      setPushSettingsOpen(false)
+      pageMenuTrigger.current?.focus({ preventScroll: true })
+    }}>
+      <header className="dialog-header">
+        <button type="button" className="icon-button" aria-label="Zatvori postavke obavijesti" onClick={() => pushSettingsDialog.current?.close()}><X size={21} /></button>
+        <h2 id="push-settings-heading" tabIndex={-1} ref={pushSettingsHeading}>Push obavijesti</h2>
+      </header>
+      <div className="draft-fields">
+        <p>Zadaci s rokom imaju tri podsjetnika u 9:00 po Zagrebu. Tri dana prije roka, na dan roka i prvi dan nakon isteka ako zadatak još nije dovršen.</p>
+        {pushSettingsOpen && <PushDevice />}
+      </div>
+    </dialog>
 
     <dialog aria-labelledby="draft-heading" className={draft?.kind === 'note' ? 'edit-dialog note-dialog' : 'edit-dialog'} ref={dialog} onCancel={event => { event.preventDefault(); closeDraft() }}>
       {draft && <form onSubmit={event => void submitDraft(event)}>
@@ -446,8 +482,9 @@ export function App() {
           <input id="item-title" className="title-input" required maxLength={300} placeholder={draft.kind === 'task' ? 'Što želiš napraviti?' : draft.item.kind === 'plan' ? 'Što želiš ostvariti?' : draft.item.kind === 'idea' ? 'Koja ti je ideja?' : 'Naslov bilješke'} value={draft.item.title} onChange={event => patchDraft({ title: event.target.value })} />
           <label className="field-label" htmlFor="item-category">Kategorija</label><select id="item-category" value={draft.item.categoryId ?? ''} onChange={event => patchDraft({ categoryId: event.target.value || null })}><option value="">Bez kategorije</option>{orderedCategories(data.categories).map(category => <option key={category.id} value={category.id}>{categoryPath(data.categories, category.id)}</option>)}</select>
           {draft.kind === 'task' ? <div className="date-fields"><label>Planirano za<input type="date" value={draft.item.plannedDate ?? ''} onChange={event => patchDraft({ plannedDate: event.target.value || null })} /></label><label>Krajnji rok<input type="date" value={draft.item.dueDate ?? ''} onChange={event => patchDraft({ dueDate: event.target.value || null })} /></label></div> : <>{draft.item.kind === 'plan' && <><p className="quiet">Opiši plan. Ako želiš pratiti napredak, pretvori retke u korake pomoću ikone checkliste.</p><PlanProgress body={draft.item.body} /></>}<Suspense fallback={<p role="status">Otvaranje editora…</p>}><NoteEditor key={`${draft.item.id}:${draft.item.version}`} body={draft.item.body} disabled={busy} kind={draft.item.kind} onChange={body => patchDraft({ body })} /></Suspense>{checklistItems(draft.item.body).length > 0 && <section className="step-links" aria-label="Zadaci iz checkboxa"><p className="quiet">Checkbox može postati povezani zadatak. Promjena stanja checkboxa primjenjuje se spremanjem. Naslov zadatka uređuje se zasebno.</p>{draft.item.version === 0 && <p className="quiet">Prvo spremi sadržaj da možeš povezati zadatke.</p>}{checklistItems(draft.item.body).map(({ node, path }, index) => <div className="step-link" key={path.join('.')}><span>{contentText(node) || `Checkbox ${index + 1}`}</span>{node.attrs?.taskId ? <button type="button" className="text-button" disabled={busy} onClick={() => openLinkedTask(String(node.attrs?.taskId))}>Otvori povezani zadatak</button> : <button type="button" className="text-button" disabled={busy || draft.item.version === 0 || !contentText(node).trim() || !draft.item.title.trim()} onClick={() => void linkStep(path)}>Stvori povezani zadatak</button>}</div>)}</section>}</>}
-          {draft.kind === 'task' && !draft.item.completedAt && !demo && taskPushPublicKey && <div className="task-reminder">
-            <label className="field-label" htmlFor="remind-at">Push podsjetnik</label>
+          {draft.kind === 'task' && !draft.item.completedAt && !demo && taskPushPublicKey && <details className="task-reminder" open={Boolean(draft.item.remindAt)}>
+            <summary>Dodatni podsjetnik</summary>
+            <label className="field-label" htmlFor="remind-at">Datum i vrijeme podsjetnika</label>
             <div className="reminder-input">
               <input id="remind-at" type="datetime-local" aria-describedby="reminder-timezone" value={draft.reminderInput ?? reminderInput(draft.item.remindAt)} onChange={event => {
                 const value = event.target.value
@@ -460,8 +497,7 @@ export function App() {
               }}>Ukloni podsjetnik</button>}
             </div>
             <p className="quiet" id="reminder-timezone">Datum i vrijeme u zoni Europe/Zagreb.</p>
-            <PushDevice />
-          </div>}
+          </details>}
           {draft.kind === 'task' && sourceNote && <button type="button" className="text-button" onClick={() => { if (dirty) setError('Prvo spremi promjene zadatka, zatim otvori izvor.'); else openDraft({ kind: 'note', item: sourceNote }) }}>Otvori izvor: {sourceNote.title}</button>}
           <label className="check-field"><input type="checkbox" checked={draft.item.pinned} onChange={event => patchDraft({ pinned: event.target.checked })} />Prikvači u Trenutno</label>
         </fieldset>

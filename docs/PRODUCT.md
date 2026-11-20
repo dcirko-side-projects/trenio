@@ -14,7 +14,7 @@ Glavna navigacija: Pregled, Kategorije i brzo dodavanje. Pregled ima samo tabove
 
 - Kategorije korisnik stvara i uređuje. Mogu sadržavati različite vrste sadržaja; prikaz prati sadržaj i skriva prazne sekcije.
 - Zadatak ima naziv, opcionalni planirani datum i zaseban opcionalni rok. Podržava uređivanje, brisanje, dovršavanje, arhivu, vraćanje i prikvačivanje.
-- Aktivni zadatak može imati jedan push podsjetnik s odabranim datumom i vremenom u zoni Europe/Zagreb. Podsjetnik se može promijeniti ili ukloniti. Dovršavanje ga otkazuje. Na uređaju na kojem je push uključen obavijest prikazuje naziv zadatka i otvara njegov obrazac.
+- Aktivni zadaci s rokom automatski šalju pojedinačne push podsjetnike u 9:00 po Zagrebu tri dana prije roka, na dan roka i prvi dan nakon isteka. Termin se računa iz aktualnog roka, a nadoknada prethodnih dana se preskače. Dodatni ručni podsjetnik po zadatku i dalje je dostupan. Push se uključuje jednom na uređaju kroz izbornik Više mogućnosti. Obavijest prikazuje naziv zadatka i otvara njegov obrazac.
 - Naziv je dovoljan za unos zadatka. Predloženo razrješenje kategorije: neobavezna kategorija, prikaz Bez kategorije, a pri unosu unutar kategorije ona je unaprijed odabrana.
 - Danas prikazuje aktivne zadatke planirane za danas, s današnjim rokom i s isteklim rokom. Jedan zadatak prikazuje se samo jednom unutar tog taba.
 - Trenutno prikazuje ručno prikvačeni sadržaj redom: zadaci, bilješke, ideje, planovi. Uklanjanje prikvačivanja ne briše izvornu stavku. Prikazi referenciraju isti zapis.

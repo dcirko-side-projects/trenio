@@ -280,6 +280,8 @@ input::placeholder{color:var(--muted);opacity:1}
 .link-fields>div{display:flex;gap:8px;flex-wrap:wrap}
 .task-reminder{margin:16px 0;padding:12px;border:1px solid var(--border);border-radius:10px}
 .task-reminder .quiet{margin:6px 0 0}
+.task-reminder summary{cursor:pointer;min-height:44px;align-content:center}
+.push-settings .draft-fields{padding-bottom:20px}
 .reminder-input{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
 .reminder-input input{min-width:0;max-width:100%;font-size:16px}
 .push-device{margin-top:8px}

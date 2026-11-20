@@ -7,6 +7,7 @@ type Delivery = {
   task_title: string
   remind_at: string
   attempt: number
+  reminder_kind: 'manual' | 'before_due' | 'due_today' | 'overdue'
   subscription: Parameters<typeof webPush.sendNotification>[0]
 }
 
@@ -34,6 +35,7 @@ Deno.serve(async (request: Request) => {
         taskId: delivery.task_id,
         title: delivery.task_title,
         remindAt: delivery.remind_at,
+        kind: delivery.reminder_kind,
       }), {
         vapidDetails: { subject: 'https://trenio.pages.dev', publicKey, privateKey },
         TTL: 900,

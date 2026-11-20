@@ -21,7 +21,7 @@ export function PushDevice() {
         const device = await worker.pushManager.getSubscription()
         const registered = device ? await updatePushDevice(device.endpoint) : false
         if (active) { setSubscription(device); setEnabled(registered && Notification.permission === 'granted'); setRegistration(worker) }
-      } catch { if (active) setError('Postavke push obavijesti nije moguće učitati. Ponovno otvori zadatak.') }
+      } catch { if (active) setError('Postavke push obavijesti nije moguće učitati. Ponovno otvori postavke.') }
     })()
     return () => { active = false }
   }, [supported])

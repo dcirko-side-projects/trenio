@@ -43,7 +43,7 @@ Kontrasti: glavni tekst na pozadini 13,17:1, bijeli tekst glavnog gumba 14,35:1,
 - Danas i Trenutno su tabovi unutar Pregleda, ne dodatne glavne destinacije.
 - Red zadatka: checkbox, naziv i samo relevantni metapodaci. Dodatne radnje dostupne su i tipkovnicom i dodirom, ne samo hoverom.
 - Brzo dodavanje prvo traži naziv; datumi, kategorija i prikvačivanje otkrivaju se po potrebi.
-- Aktivni zadatak ima opcionalno polje Push podsjetnik ispod datuma zadatka, s navedenom vremenskom zonom. Kontrola dozvole je odvojena od spremanja zadatka i opisuje da se naziv prikazuje u obavijesti.
+- Postavke u izborniku Više mogućnosti → Push obavijesti sadrže jednu kontrolu dozvole za uređaj i opis automatskog rasporeda. Aktivan zadatak ima opcionalni, sažeti odjeljak Dodatni podsjetnik za odabir vremena izvan rasporeda.
 - Editor ima mali skup kontrola i naredbu pretvaranja odlomka u checklistu. Bez izgradnje vlastitog složenog editora.
 - Svaka komponenta ima relevantna stanja učitavanja, praznog sadržaja, greške, fokusa i onemogućenosti.
 - Spremanje jasno razlikuje izmijenjeno, spremanje, spremljeno i neuspjelo. Sačuvati unos kod greške.

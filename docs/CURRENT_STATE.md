@@ -2,6 +2,12 @@
 
 Ažurirano: 20. 11. 2026.
 
+## Automatski push prema roku — 20. 11. 2026.
+
+Zadaci s rokom automatski dobivaju pojedinačne podsjetnike u 9:00 po Zagrebu tri dana prije roka, na dan roka i prvi dan nakon isteka dok su nedovršeni. Rok određuje buduće termine i za postojeće zadatke. Propušteni prethodni dani se preskaču. Push se uključuje jednom kroz Više mogućnosti → Push obavijesti. Postojeći dodatni ručni podsjetnici su očuvani.
+
+Lokalna provjera u PGliteu obuhvaća svih devet migracija i sedam SQL provjera. Novi slučaj pokriva sva tri termina, zimsko i ljetno vrijeme, preklop s ručnim podsjetnikom, promjenu i uklanjanje roka te dovršavanje. Integracijski pregled na mobitelu i desktopu pokriva jednokratno uključivanje, spremanje samo s rokom i prijašnji ručni tijek.
+
 ## Push podsjetnik za zadatak — 20. 11. 2026.
 
 Objavljen je pojedinačni push s nazivom zadatka i ručno odabranim vremenom u zoni Europe/Zagreb. Vlasnik uključuje push na uređaju na kojem želi primati podsjetnike. Na dodir obavijesti otvara se zadatak. Uređivanje može promijeniti ili ukloniti termin, a dovršavanje ga otkazuje.
